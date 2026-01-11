@@ -65,6 +65,11 @@ class OllamaService {
   async listModels(): Promise<OllamaModel[]> {
     try {
       const response = await fetch(`${this.baseUrl}/api/tags`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
       const data = await response.json();
       return data.models || [];
     } catch (error) {
@@ -77,12 +82,21 @@ class OllamaService {
    * Pull/download a model
    */
   async pullModel(modelName: string, onProgress?: (progress: string) => void): Promise<void> {
+    // Validate model name
+    if (!modelName || typeof modelName !== 'string' || modelName.trim().length === 0) {
+      throw new Error('Invalid model name');
+    }
+
     try {
       const response = await fetch(`${this.baseUrl}/api/pull`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: modelName, stream: true }),
       });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
 
       if (!response.body) {
         throw new Error('No response body');
@@ -122,6 +136,9 @@ class OllamaService {
    * Generate response from a model
    */
   async generate(request: OllamaRequest): Promise<OllamaResponse> {
+    // Validate request
+    this.validateRequest(request);
+
     try {
       const response = await fetch(`${this.baseUrl}/api/generate`, {
         method: 'POST',
@@ -133,12 +150,23 @@ class OllamaService {
       });
 
       if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
+        const errorText = await response.text().catch(() => 'Unknown error');
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
       }
 
-      return await response.json();
+      const data = await response.json();
+      
+      // Validate response structure
+      if (!data || typeof data !== 'object') {
+        throw new Error('Invalid response format');
+      }
+
+      return data as OllamaResponse;
     } catch (error) {
       console.error('Error generating response:', error);
+      if (error instanceof Error && error.message.includes('HTTP error')) {
+        throw error;
+      }
       throw new Error(`Failed to generate response from model: ${request.model}`);
     }
   }
@@ -150,6 +178,9 @@ class OllamaService {
     request: OllamaRequest,
     onChunk: (chunk: string) => void
   ): Promise<void> {
+    // Validate request
+    this.validateRequest(request);
+
     try {
       const response = await fetch(`${this.baseUrl}/api/generate`, {
         method: 'POST',
@@ -160,6 +191,11 @@ class OllamaService {
           options: { ...this.defaultOptions, ...request.options },
         }),
       });
+
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => 'Unknown error');
+        throw new Error(`HTTP error! status: ${response.status}, message: ${errorText}`);
+      }
 
       if (!response.body) {
         throw new Error('No response body');
@@ -211,11 +247,67 @@ class OllamaService {
    * Get model info
    */
   async getModelInfo(modelName: string): Promise<OllamaModel | null> {
+    // Validate model name
+    if (!modelName || typeof modelName !== 'string' || modelName.trim().length === 0) {
+      return null;
+    }
+
     try {
       const models = await this.listModels();
       return models.find(m => m.name === modelName) || null;
     } catch {
       return null;
+    }
+  }
+
+  /**
+   * Validate request before sending
+   */
+  private validateRequest(request: OllamaRequest): void {
+    if (!request) {
+      throw new Error('Request is required');
+    }
+
+    if (!request.model || typeof request.model !== 'string' || request.model.trim().length === 0) {
+      throw new Error('Model name is required and must be a non-empty string');
+    }
+
+    if (!request.prompt || typeof request.prompt !== 'string') {
+      throw new Error('Prompt is required and must be a string');
+    }
+
+    if (request.prompt.length === 0) {
+      throw new Error('Prompt cannot be empty');
+    }
+
+    // Warn about very long prompts (but don't block)
+    if (request.prompt.length > 100000) {
+      console.warn('Very long prompt detected. Consider chunking for better performance.');
+    }
+
+    // Validate options if provided
+    if (request.options) {
+      if (request.options.temperature !== undefined && 
+          (request.options.temperature < 0 || request.options.temperature > 2)) {
+        throw new Error('Temperature must be between 0 and 2');
+      }
+
+      if (request.options.top_p !== undefined && 
+          (request.options.top_p < 0 || request.options.top_p > 1)) {
+        throw new Error('top_p must be between 0 and 1');
+      }
+
+      if (request.options.top_k !== undefined && request.options.top_k < 0) {
+        throw new Error('top_k must be non-negative');
+      }
+
+      if (request.options.num_predict !== undefined && request.options.num_predict < 0) {
+        throw new Error('num_predict must be non-negative');
+      }
+
+      if (request.options.repeat_penalty !== undefined && request.options.repeat_penalty < 0) {
+        throw new Error('repeat_penalty must be non-negative');
+      }
     }
   }
 }
