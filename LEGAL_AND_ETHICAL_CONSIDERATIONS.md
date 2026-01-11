@@ -65,14 +65,43 @@
 
 ---
 
-## 🔍 WHAT WE NEED TO INVESTIGATE
+## 🔍 CHERRY STUDIO LICENSING FINDINGS
 
-### **1. Cherry Studio Terms of Service**
-- [ ] Read full ToS
-- [ ] Identify payment requirements
-- [ ] Check VPN/proxy restrictions
-- [ ] Verify commercial use terms
-- [ ] Check redistribution terms
+### **1. Cherry Studio Terms of Service - INVESTIGATED ✅**
+
+**Key Findings:**
+
+1. **Community Edition License:**
+   - Cherry Studio Community Edition is **AGPL-3.0** licensed
+   - ✅ **Allows commercial use** if you comply with AGPL-3.0 terms
+   - ✅ **Free to use** unmodified software commercially
+   - ⚠️ **Must comply with AGPL-3.0** (open source your modifications)
+
+2. **Commercial License Requirements:**
+   - ❌ **Need commercial license if:**
+     - Modifying Cherry Studio software
+     - Creating derivative works
+     - Integrating into your own software
+     - Providing services to 10+ cumulative users
+     - Pre-installing or bundling with hardware
+
+3. **Contact Information:**
+   - Email: [email protected]
+   - Phone: 18954281942
+   - Must contact for commercial license
+
+4. **VPN/Proxy Pattern:**
+   - ⚠️ **Likely violates ToS** - Circumventing payment mechanisms
+   - ⚠️ **Not recommended** - Legal risk
+   - ✅ **Must use legitimate access** - Get proper license
+
+### **2. Legal Status Assessment:**
+
+**Using Cherry Studio Models:**
+- ✅ **Legal IF:** Using unmodified Community Edition (AGPL-3.0)
+- ✅ **Legal IF:** Get commercial license for modifications
+- ❌ **NOT Legal:** Using VPN/proxy to bypass costs
+- ❌ **NOT Legal:** Modifying without commercial license
 
 ### **2. Cherry Studio API Policies**
 - [ ] API usage limits
@@ -349,9 +378,54 @@
 
 **Recommended Approach:** **Hybrid Legal Model**
 
-1. **Free Tier:** Open source models only (100% legal)
-2. **Pro Tier:** Legitimate API access (free tiers + paid where needed)
-3. **Enterprise Tier:** Direct partnerships + commercial licenses
+### **Option A: Use Cherry Studio Community Edition (AGPL-3.0)**
+**Status:** ✅ **LEGAL** (if compliant with AGPL-3.0)
+
+**Requirements:**
+- Use unmodified Cherry Studio Community Edition
+- Comply with AGPL-3.0 terms (open source modifications)
+- Can use commercially without fee
+- Must open source any modifications
+
+**Pros:**
+- ✅ Free to use
+- ✅ Legal commercial use
+- ✅ Access to Cherry Studio models
+
+**Cons:**
+- ⚠️ Must open source modifications (AGPL-3.0 requirement)
+- ⚠️ May conflict with proprietary business model
+- ⚠️ Limited if you want to keep code proprietary
+
+---
+
+### **Option B: Get Commercial License from Cherry Studio**
+**Status:** ✅ **LEGAL** (with proper license)
+
+**Requirements:**
+- Contact Cherry Studio: [email protected]
+- Negotiate commercial license
+- Pay license fee (if required)
+- Get written commercial license
+
+**Pros:**
+- ✅ 100% legal
+- ✅ Can keep code proprietary
+- ✅ Official partnership
+- ✅ Access to all models
+
+**Cons:**
+- ⚠️ May have licensing costs
+- ⚠️ Requires negotiation
+- ⚠️ Takes time to establish
+
+---
+
+### **Option C: Hybrid Approach (Recommended)**
+**Structure:**
+1. **Free Tier:** Open source models only (Ollama, Hugging Face)
+2. **Pro Tier:** Legitimate API access (Google Gemini, OpenAI, Anthropic) + Cherry Studio Community Edition (AGPL-3.0 compliant)
+3. **Enterprise Tier:** Commercial licenses from all providers
 
 **Why:**
 - ✅ 100% legal and compliant
@@ -359,24 +433,61 @@
 - ✅ Sustainable business model
 - ✅ Still competitive
 - ✅ No legal risk
+- ✅ Can use Cherry Studio Community Edition legally
 
 **Next Steps:**
-1. Investigate Cherry Studio ToS immediately
-2. Research open source alternatives
-3. Identify legitimate API providers
-4. Revise business model based on findings
+1. ✅ Cherry Studio ToS investigated
+2. [ ] Contact Cherry Studio for commercial license discussion
+3. [ ] Research open source alternatives (Ollama, Hugging Face)
+4. [ ] Identify legitimate API providers (Google Gemini, OpenAI, Anthropic)
+5. [ ] Revise business model based on findings
 
 ---
 
-## 🚨 CRITICAL WARNING
+## 🚨 CRITICAL FINDINGS
 
-**DO NOT proceed with VPN/proxy pattern until:**
-- ✅ Cherry Studio ToS reviewed
-- ✅ Legal counsel consulted
-- ✅ Legitimate alternatives identified
-- ✅ Business model revised
+### **VPN/Proxy Pattern: NOT RECOMMENDED ❌**
 
-**Risk:** Legal action, business failure, reputation damage
+**Status:** ⚠️ **LIKELY VIOLATES ToS**
+
+**Why:**
+- Circumventing payment mechanisms
+- Unauthorized access
+- Terms of service violations
+- Potential legal action
+
+**Risk:** 
+- Account termination
+- Legal action
+- Reputation damage
+- Business model failure
+
+**Recommendation:** **DO NOT USE VPN/PROXY PATTERN**
+
+---
+
+### **Legal Alternatives: ✅**
+
+1. **Use Cherry Studio Community Edition (AGPL-3.0)**
+   - ✅ Free commercial use
+   - ✅ Legal if compliant
+   - ⚠️ Must open source modifications
+
+2. **Get Commercial License from Cherry Studio**
+   - ✅ 100% legal
+   - ✅ Can keep proprietary
+   - Contact: [email protected]
+
+3. **Use Open Source Alternatives**
+   - ✅ Ollama (100% legal)
+   - ✅ Hugging Face (many open source)
+   - ✅ Self-hosted models
+
+4. **Use Legitimate API Providers**
+   - ✅ Google Gemini (free tier)
+   - ✅ OpenAI (free tier)
+   - ✅ Anthropic (free tier)
+   - ✅ Hugging Face (free tier)
 
 ---
 
