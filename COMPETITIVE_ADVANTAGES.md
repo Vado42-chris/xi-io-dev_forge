@@ -26,19 +26,20 @@
 - ✅ Hybrid architecture = Best of both
 
 ### **Marketing Message:**
-**"Dev Forge: The Only Multi-Model Coding Engine That's Actually Free"**
+**"Dev Forge: Free Forever, Upgrade When Ready"**
 
 **Proof Points:**
-- Access to hundreds of models for $0
-- No API costs (VPN/proxy pattern)
-- Local models via Ollama (free)
-- Free tier API keys (Google Gemini)
+- Free tier: 11 local models (Ollama) - $0 forever
+- Pro tier: 100+ remote models - $499 one-time (lifetime access)
+- Enterprise tier: Unlimited users - $1,999 one-time
+- Break-even in 25 months vs Cursor ($20/month)
+- Save $701 over 5 years vs Cursor
 
 **Competitor Comparison:**
-- Cursor: Paid subscription ($20/month)
-- Cherry Studio: Paid API calls
-- GitHub Copilot: Paid ($10/month)
-- **Dev Forge: FREE** ✅
+- Cursor: $20/month = $1,200 over 5 years
+- GitHub Copilot: $10/month = $600 over 5 years
+- Cherry Studio: Pay per API call (variable)
+- **Dev Forge: Free tier + $499 one-time (lifetime)** ✅
 
 ---
 

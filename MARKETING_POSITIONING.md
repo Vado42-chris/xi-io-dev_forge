@@ -11,7 +11,7 @@
 **"Dev Forge: The Only Multi-Model Coding Engine That Actually Works"**
 
 **Subheadline:**
-**"Free. Fast. Intelligent. Powered by 30 Years of Professional UX + Revolutionary Frameworks"**
+**"Free Forever, Upgrade When Ready. One-Time Payment, Lifetime Access. Powered by 30 Years of Professional UX + Revolutionary Frameworks"**
 
 ---
 
