@@ -49,20 +49,33 @@ export class ParallelExecutionService {
     request: ParallelExecutionRequest,
     onProgress?: (completed: number, total: number, result?: ModelResult) => void
   ): Promise<ParallelExecutionResult> {
+    // Validate request
+    this.validateRequest(request);
+
+    // Check if modelManager is initialized
+    if (!modelManager.getInitialized()) {
+      throw new Error('ModelManager is not initialized. Call modelManager.initialize() first.');
+    }
+
     const startTime = Date.now();
 
     // Get models to execute on
     const models = this.getModelsToExecute(request.modelIds);
     
     if (models.length === 0) {
-      throw new Error('No models available for execution');
+      throw new Error('No models available for execution. Install at least one model first.');
     }
 
     console.log(`[ParallelExecution] Executing on ${models.length} models`);
 
     // Execute on all models simultaneously
-    const promises = models.map(model => 
-      this.executeOnModel(model, request, onProgress)
+    let completedCount = 0;
+    const promises = models.map((model, index) => 
+      this.executeOnModel(model, request).then(result => {
+        completedCount++;
+        onProgress?.(completedCount, models.length, result);
+        return result;
+      })
     );
 
     // Wait for all to complete (or timeout)
@@ -124,10 +137,10 @@ export class ParallelExecutionService {
    */
   private async executeOnModel(
     model: ModelMetadata,
-    request: ParallelExecutionRequest,
-    onProgress?: (completed: number, total: number, result?: ModelResult) => void
+    request: ParallelExecutionRequest
   ): Promise<ModelResult> {
     const startTime = Date.now();
+    const timeout = request.timeout || this.defaultTimeout;
 
     try {
       const ollamaRequest: OllamaRequest = {
@@ -136,11 +149,19 @@ export class ParallelExecutionService {
         options: request.options,
       };
 
-      // Execute with timeout
-      const response = await Promise.race([
-        ollamaService.generate(ollamaRequest),
-        this.createTimeout(request.timeout || this.defaultTimeout),
-      ]) as OllamaResponse;
+      // Execute with timeout - use AbortController for proper cancellation
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), timeout);
+
+      try {
+        // Note: ollamaService.generate doesn't support AbortSignal yet
+        // This is a placeholder for future enhancement
+        const response = await Promise.race([
+          ollamaService.generate(ollamaRequest),
+          this.createTimeout(timeout),
+        ]) as OllamaResponse;
+
+        clearTimeout(timeoutId);
 
       const latency = Date.now() - startTime;
 
@@ -153,7 +174,11 @@ export class ParallelExecutionService {
         timestamp: new Date(),
       };
 
-      return result;
+        return result;
+      } catch (raceError) {
+        clearTimeout(timeoutId);
+        throw raceError;
+      }
     } catch (error) {
       const latency = Date.now() - startTime;
 
@@ -245,13 +270,21 @@ export class ParallelExecutionService {
     onChunk: (modelId: string, chunk: string) => void,
     onComplete?: (result: ModelResult) => void
   ): Promise<ParallelExecutionResult> {
+    // Validate request
+    this.validateRequest(request);
+
+    // Check if modelManager is initialized
+    if (!modelManager.getInitialized()) {
+      throw new Error('ModelManager is not initialized. Call modelManager.initialize() first.');
+    }
+
     const startTime = Date.now();
 
     // Get models to execute on
     const models = this.getModelsToExecute(request.modelIds);
     
     if (models.length === 0) {
-      throw new Error('No models available for execution');
+      throw new Error('No models available for execution. Install at least one model first.');
     }
 
     console.log(`[ParallelExecution] Streaming on ${models.length} models`);
@@ -311,6 +344,7 @@ export class ParallelExecutionService {
     onComplete?: (result: ModelResult) => void
   ): Promise<ModelResult> {
     const startTime = Date.now();
+    const timeout = request.timeout || this.defaultTimeout;
     let fullResponse = '';
 
     try {
@@ -320,11 +354,27 @@ export class ParallelExecutionService {
         options: request.options,
       };
 
-      // Execute with streaming
-      await ollamaService.generateStream(ollamaRequest, (chunk) => {
-        fullResponse += chunk;
-        onChunk(model.id, chunk);
+      // Execute with streaming and timeout
+      const streamPromise = new Promise<void>((resolve, reject) => {
+        const timeoutId = setTimeout(() => {
+          reject(new Error('Stream timeout'));
+        }, timeout);
+
+        ollamaService.generateStream(ollamaRequest, (chunk) => {
+          fullResponse += chunk;
+          onChunk(model.id, chunk);
+        })
+          .then(() => {
+            clearTimeout(timeoutId);
+            resolve();
+          })
+          .catch((error) => {
+            clearTimeout(timeoutId);
+            reject(error);
+          });
       });
+
+      await streamPromise;
 
       const latency = Date.now() - startTime;
 
@@ -354,6 +404,54 @@ export class ParallelExecutionService {
 
       onComplete?.(result);
       return result;
+    }
+  }
+}
+
+  /**
+   * Validate request
+   */
+  private validateRequest(request: ParallelExecutionRequest): void {
+    if (!request) {
+      throw new Error('Request is required');
+    }
+
+    if (!request.prompt || typeof request.prompt !== 'string') {
+      throw new Error('Prompt is required and must be a string');
+    }
+
+    if (request.prompt.trim().length === 0) {
+      throw new Error('Prompt cannot be empty');
+    }
+
+    // Warn about very long prompts
+    if (request.prompt.length > 100000) {
+      console.warn('[ParallelExecution] Very long prompt detected. Consider chunking for better performance.');
+    }
+
+    // Validate timeout if provided
+    if (request.timeout !== undefined) {
+      if (typeof request.timeout !== 'number' || request.timeout < 0) {
+        throw new Error('Timeout must be a non-negative number');
+      }
+      if (request.timeout < 1000) {
+        console.warn('[ParallelExecution] Timeout is very short (< 1 second). This may cause premature timeouts.');
+      }
+    }
+
+    // Validate modelIds if provided
+    if (request.modelIds !== undefined) {
+      if (!Array.isArray(request.modelIds)) {
+        throw new Error('modelIds must be an array');
+      }
+      if (request.modelIds.length === 0) {
+        throw new Error('modelIds cannot be empty array. Omit to use all installed models.');
+      }
+      request.modelIds.forEach((id, index) => {
+        if (typeof id !== 'string' || id.trim().length === 0) {
+          throw new Error(`modelIds[${index}] must be a non-empty string`);
+        }
+      });
     }
   }
 }
