@@ -1,0 +1,22 @@
+{
+  "name": "dev-forge",
+  "version": "0.1.0",
+  "description": "Multiagent coding engine powered by VectorForge framework",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "keywords": [
+    "coding-engine",
+    "multiagent",
+    "vectorforge",
+    "xibalba"
+  ],
+  "author": "Chris Hallberg",
+  "license": "MIT",
+  "dependencies": {},
+  "devDependencies": {}
+}
+
