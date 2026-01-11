@@ -406,7 +406,6 @@ export class ParallelExecutionService {
       return result;
     }
   }
-}
 
   /**
    * Validate request

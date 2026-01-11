@@ -30,8 +30,11 @@ export class AggregationService {
    * Aggregate responses intelligently
    */
   aggregateResponses(results: ModelResult[]): AggregatedResponse {
+    // Validate input
+    this.validateResults(results);
+
     // Filter successful responses
-    const successful = results.filter(r => r.success && r.response.length > 0);
+    const successful = results.filter(r => r.success && r.response && r.response.length > 0);
     
     if (successful.length === 0) {
       throw new Error('No successful responses to aggregate');
@@ -39,6 +42,28 @@ export class AggregationService {
 
     // Filter by quality
     const qualityFiltered = this.filterByQuality(successful);
+
+    // Ensure we have at least one quality response
+    if (qualityFiltered.length === 0) {
+      // If all filtered out, use original successful (lower threshold)
+      const lowerThreshold = this.filterByQuality(successful, 0.3);
+      if (lowerThreshold.length === 0) {
+        throw new Error('No responses meet quality threshold');
+      }
+      const bestResponse = this.selectBest(lowerThreshold);
+      const consensus = this.weightedConsensus(lowerThreshold);
+      const groups = this.semanticGrouping(lowerThreshold);
+      const topResponses = this.getTopResponses(lowerThreshold, 5);
+      const confidence = this.calculateConfidence(lowerThreshold, consensus);
+
+      return {
+        consensus,
+        bestResponse,
+        topResponses,
+        groups,
+        confidence,
+      };
+    }
 
     // Select best response
     const bestResponse = this.selectBest(qualityFiltered);
@@ -68,6 +93,15 @@ export class AggregationService {
    * Filter responses by quality
    */
   private filterByQuality(responses: ModelResult[], threshold: number = 0.6): ModelResult[] {
+    // Validate threshold
+    if (typeof threshold !== 'number' || threshold < 0 || threshold > 1) {
+      throw new Error('Quality threshold must be a number between 0 and 1');
+    }
+
+    if (responses.length === 0) {
+      return [];
+    }
+
     return responses
       .map(r => ({
         result: r,
@@ -82,6 +116,11 @@ export class AggregationService {
    * Score response quality (0-1)
    */
   private scoreQuality(result: ModelResult): number {
+    // Validate result structure
+    if (!result || !result.response || typeof result.response !== 'string') {
+      return 0;
+    }
+
     const factors = {
       length: result.response.length > 100 ? 1.0 : result.response.length > 50 ? 0.7 : 0.4,
       latency: result.latency && result.latency < 5000 ? 1.0 : result.latency && result.latency < 10000 ? 0.7 : 0.5,
@@ -89,12 +128,15 @@ export class AggregationService {
       coherence: this.checkCoherence(result.response),
     };
 
-    return (
+    const score = (
       factors.length * 0.3 +
       factors.latency * 0.2 +
       factors.modelReputation * 0.3 +
       factors.coherence * 0.2
     );
+
+    // Ensure score is between 0 and 1
+    return Math.max(0, Math.min(1, score));
   }
 
   /**
@@ -133,6 +175,14 @@ export class AggregationService {
    * Select best response
    */
   private selectBest(responses: ModelResult[]): ModelResult {
+    if (responses.length === 0) {
+      throw new Error('Cannot select best from empty responses array');
+    }
+
+    if (responses.length === 1) {
+      return responses[0];
+    }
+
     return responses.reduce((best, current) => {
       const bestScore = this.scoreQuality(best);
       const currentScore = this.scoreQuality(current);
@@ -210,13 +260,24 @@ export class AggregationService {
    * Get top N responses
    */
   private getTopResponses(responses: ModelResult[], n: number): ModelResult[] {
+    if (responses.length === 0) {
+      return [];
+    }
+
+    // Validate n
+    if (typeof n !== 'number' || n < 0) {
+      throw new Error('n must be a non-negative number');
+    }
+
+    const actualN = Math.min(n, responses.length);
+
     return responses
       .map(r => ({
         result: r,
         score: this.scoreQuality(r),
       }))
       .sort((a, b) => b.score - a.score)
-      .slice(0, n)
+      .slice(0, actualN)
       .map(({ result }) => result);
   }
 
@@ -227,18 +288,21 @@ export class AggregationService {
     if (responses.length === 0) return 0;
 
     // Confidence based on:
-    // 1. Number of successful responses
+    // 1. Number of successful responses (always 1.0 since we filter)
     // 2. Agreement between responses
     // 3. Quality of responses
 
-    const successRate = responses.length / (responses.length + (responses.length === 0 ? 1 : 0));
+    const successRate = 1.0; // All responses are successful at this point
     const avgQuality = responses.reduce((sum, r) => sum + this.scoreQuality(r), 0) / responses.length;
     
     // Simple agreement: check if top responses are similar
-    const top3 = this.getTopResponses(responses, 3);
+    const top3 = this.getTopResponses(responses, Math.min(3, responses.length));
     const agreement = this.calculateAgreement(top3);
 
-    return (successRate * 0.3 + avgQuality * 0.4 + agreement * 0.3);
+    const confidence = (successRate * 0.3 + avgQuality * 0.4 + agreement * 0.3);
+
+    // Ensure confidence is between 0 and 1
+    return Math.max(0, Math.min(1, confidence));
   }
 
   /**
@@ -248,14 +312,61 @@ export class AggregationService {
     if (responses.length < 2) return 1.0;
 
     // Simple: check length similarity
-    const lengths = responses.map(r => r.response.length);
+    const lengths = responses.map(r => r.response?.length || 0).filter(len => len > 0);
+    
+    if (lengths.length < 2) return 0.5; // Not enough data
+
     const avgLength = lengths.reduce((a, b) => a + b, 0) / lengths.length;
+    
+    if (avgLength === 0) return 0; // All empty
+
     const variance = lengths.reduce((sum, len) => sum + Math.pow(len - avgLength, 2), 0) / lengths.length;
     const stdDev = Math.sqrt(variance);
     const coefficientOfVariation = stdDev / avgLength;
 
     // Lower variance = higher agreement
-    return Math.max(0, 1 - coefficientOfVariation);
+    const agreement = Math.max(0, 1 - coefficientOfVariation);
+    return Math.min(1, agreement); // Ensure between 0 and 1
+  }
+
+  /**
+   * Validate results array
+   */
+  private validateResults(results: ModelResult[]): void {
+    if (!results) {
+      throw new Error('Results array is required');
+    }
+
+    if (!Array.isArray(results)) {
+      throw new Error('Results must be an array');
+    }
+
+    if (results.length === 0) {
+      throw new Error('Results array cannot be empty');
+    }
+
+    // Validate each result has required fields
+    results.forEach((result, index) => {
+      if (!result || typeof result !== 'object') {
+        throw new Error(`Result at index ${index} must be an object`);
+      }
+
+      if (typeof result.success !== 'boolean') {
+        throw new Error(`Result at index ${index} must have a boolean 'success' field`);
+      }
+
+      if (!result.modelId || typeof result.modelId !== 'string') {
+        throw new Error(`Result at index ${index} must have a string 'modelId' field`);
+      }
+
+      if (!result.modelName || typeof result.modelName !== 'string') {
+        throw new Error(`Result at index ${index} must have a string 'modelName' field`);
+      }
+
+      if (result.response !== undefined && typeof result.response !== 'string') {
+        throw new Error(`Result at index ${index} must have a string 'response' field or undefined`);
+      }
+    });
   }
 }
 
