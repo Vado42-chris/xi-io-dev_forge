@@ -33,11 +33,18 @@ export class ModelManager {
   private models: Map<string, ModelMetadata> = new Map();
   private activeModelId: string | null = null;
   private installedModels: OllamaModel[] = [];
+  private isInitialized: boolean = false;
 
   /**
    * Initialize model manager
    */
   async initialize(): Promise<void> {
+    // Prevent multiple initializations
+    if (this.isInitialized) {
+      console.log('[ModelManager] Already initialized, skipping...');
+      return;
+    }
+
     console.log('[ModelManager] Initializing...');
     
     // Check if Ollama is running
@@ -52,6 +59,10 @@ export class ModelManager {
     // Register available models
     this.registerModels();
 
+    // Update installed status for all registered models
+    this.updateInstalledStatus();
+
+    this.isInitialized = true;
     console.log(`[ModelManager] Initialized with ${this.models.size} models`);
   }
 
@@ -62,10 +73,28 @@ export class ModelManager {
     try {
       this.installedModels = await ollamaService.listModels();
       console.log(`[ModelManager] Found ${this.installedModels.length} installed models`);
+      
+      // Update installed status for all registered models
+      if (this.isInitialized) {
+        this.updateInstalledStatus();
+      }
     } catch (error) {
       console.error('[ModelManager] Error refreshing installed models:', error);
       this.installedModels = [];
+      // Update status even on error (all will be marked as not installed)
+      if (this.isInitialized) {
+        this.updateInstalledStatus();
+      }
     }
+  }
+
+  /**
+   * Update installed status for all registered models
+   */
+  private updateInstalledStatus(): void {
+    this.models.forEach((model) => {
+      model.isInstalled = this.isModelInstalled(model.name);
+    });
   }
 
   /**
@@ -221,7 +250,44 @@ export class ModelManager {
    * Register a model
    */
   private registerModel(metadata: ModelMetadata): void {
+    // Validate metadata
+    this.validateModelMetadata(metadata);
+
+    // Check for duplicate ID
+    if (this.models.has(metadata.id)) {
+      console.warn(`[ModelManager] Duplicate model ID detected: ${metadata.id}. Overwriting...`);
+    }
+
     this.models.set(metadata.id, metadata);
+  }
+
+  /**
+   * Validate model metadata
+   */
+  private validateModelMetadata(metadata: ModelMetadata): void {
+    if (!metadata.id || typeof metadata.id !== 'string' || metadata.id.trim().length === 0) {
+      throw new Error('Model ID is required and must be a non-empty string');
+    }
+
+    if (!metadata.name || typeof metadata.name !== 'string' || metadata.name.trim().length === 0) {
+      throw new Error('Model name is required and must be a non-empty string');
+    }
+
+    if (!metadata.displayName || typeof metadata.displayName !== 'string' || metadata.displayName.trim().length === 0) {
+      throw new Error('Model displayName is required and must be a non-empty string');
+    }
+
+    if (typeof metadata.size !== 'number' || metadata.size < 0) {
+      throw new Error('Model size must be a non-negative number');
+    }
+
+    if (!metadata.category || !['coding', 'general', 'reasoning', 'multimodal', 'embedding'].includes(metadata.category)) {
+      throw new Error('Model category must be one of: coding, general, reasoning, multimodal, embedding');
+    }
+
+    if (!Array.isArray(metadata.tags)) {
+      throw new Error('Model tags must be an array');
+    }
   }
 
   /**
@@ -307,25 +373,70 @@ export class ModelManager {
    * Install a model
    */
   async installModel(id: string, onProgress?: (progress: string) => void): Promise<void> {
+    // Validate model exists
     const model = this.models.get(id);
     if (!model) {
       throw new Error(`Model not found: ${id}`);
     }
 
+    // Check if already installed
     if (model.isInstalled) {
       console.log(`[ModelManager] Model already installed: ${model.displayName}`);
       return;
     }
 
     console.log(`[ModelManager] Installing model: ${model.displayName}`);
-    await ollamaService.pullModel(model.name, onProgress);
+    
+    try {
+      await ollamaService.pullModel(model.name, onProgress);
 
-    // Refresh installed models
-    await this.refreshInstalledModels();
+      // Refresh installed models
+      await this.refreshInstalledModels();
 
-    // Update model status
-    model.isInstalled = this.isModelInstalled(model.name);
-    console.log(`[ModelManager] Model installed: ${model.displayName}`);
+      // Verify installation
+      const isNowInstalled = this.isModelInstalled(model.name);
+      if (!isNowInstalled) {
+        throw new Error(`Model installation completed but model not found in Ollama: ${model.name}`);
+      }
+
+      model.isInstalled = true;
+      console.log(`[ModelManager] Model installed successfully: ${model.displayName}`);
+    } catch (error) {
+      console.error(`[ModelManager] Error installing model: ${model.displayName}`, error);
+      model.isInstalled = false;
+      throw new Error(`Failed to install model: ${model.displayName}. ${error instanceof Error ? error.message : 'Unknown error'}`);
+    }
+  }
+
+  /**
+   * Get model count
+   */
+  getModelCount(): number {
+    return this.models.size;
+  }
+
+  /**
+   * Get installed model count
+   */
+  getInstalledModelCount(): number {
+    return this.getInstalledModels().length;
+  }
+
+  /**
+   * Check if manager is initialized
+   */
+  getInitialized(): boolean {
+    return this.isInitialized;
+  }
+
+  /**
+   * Reset manager (for testing)
+   */
+  reset(): void {
+    this.models.clear();
+    this.activeModelId = null;
+    this.installedModels = [];
+    this.isInitialized = false;
   }
 }
 
