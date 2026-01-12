@@ -8,7 +8,7 @@
   "private": true,
   "scripts": {
     "build": "tsc && npm run copy-assets",
-        "copy-assets": "cp index.html dist/ && mkdir -p dist/styles && cp src/styles/*.css dist/styles/ 2>/dev/null || true",
+        "copy-assets": "cp index.html dist/ && mkdir -p dist/styles && cp -r src/styles/*.css dist/styles/ 2>/dev/null || true",
     "watch": "tsc --watch",
     "start": "npm run build && electron dist/main.js",
     "dev": "npm run build && electron dist/main.js --dev",
