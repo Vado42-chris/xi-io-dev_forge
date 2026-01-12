@@ -27,12 +27,7 @@
         },
         "devForge.models.defaultProvider": {
           "type": "string",
-          "enum": [
-            "ollama",
-            "gguf",
-            "api",
-            "plugin"
-          ],
+          "enum": ["ollama", "gguf", "api", "plugin"],
           "default": "ollama",
           "description": "Default model provider"
         },
@@ -61,20 +56,10 @@
           "items": {
             "type": "object",
             "properties": {
-              "id": {
-                "type": "string"
-              },
-              "name": {
-                "type": "string"
-              },
-              "enabled": {
-                "type": "boolean",
-                "default": true
-              },
-              "priority": {
-                "type": "number",
-                "default": 0
-              }
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "enabled": { "type": "boolean", "default": true },
+              "priority": { "type": "number", "default": 0 }
             }
           },
           "default": [],
@@ -105,26 +90,12 @@
           "items": {
             "type": "object",
             "properties": {
-              "id": {
-                "type": "string"
-              },
-              "name": {
-                "type": "string"
-              },
-              "path": {
-                "type": "string"
-              },
-              "quantization": {
-                "type": "string"
-              },
-              "contextSize": {
-                "type": "number",
-                "default": 4096
-              },
-              "enabled": {
-                "type": "boolean",
-                "default": true
-              }
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "path": { "type": "string" },
+              "quantization": { "type": "string" },
+              "contextSize": { "type": "number", "default": 4096 },
+              "enabled": { "type": "boolean", "default": true }
             }
           },
           "default": [],
@@ -145,24 +116,13 @@
           "items": {
             "type": "object",
             "properties": {
-              "id": {
-                "type": "string"
-              },
-              "name": {
-                "type": "string"
-              },
+              "id": { "type": "string" },
+              "name": { "type": "string" },
               "type": {
                 "type": "string",
-                "enum": [
-                  "openai",
-                  "anthropic",
-                  "cursor",
-                  "custom"
-                ]
+                "enum": ["openai", "anthropic", "cursor", "custom"]
               },
-              "baseUrl": {
-                "type": "string"
-              },
+              "baseUrl": { "type": "string" },
               "apiKey": {
                 "type": "string",
                 "description": "API key (stored securely, use ${env:VAR_NAME} for env vars)"
@@ -171,23 +131,13 @@
                 "type": "object",
                 "description": "Custom headers"
               },
-              "enabled": {
-                "type": "boolean",
-                "default": true
-              },
-              "timeout": {
-                "type": "number",
-                "default": 30000
-              },
+              "enabled": { "type": "boolean", "default": true },
+              "timeout": { "type": "number", "default": 30000 },
               "rateLimit": {
                 "type": "object",
                 "properties": {
-                  "requestsPerMinute": {
-                    "type": "number"
-                  },
-                  "requestsPerHour": {
-                    "type": "number"
-                  }
+                  "requestsPerMinute": { "type": "number" },
+                  "requestsPerHour": { "type": "number" }
                 }
               }
             }
@@ -233,19 +183,13 @@
         },
         "devForge.parallelExecution.defaultModels": {
           "type": "array",
-          "items": {
-            "type": "string"
-          },
+          "items": { "type": "string" },
           "default": [],
           "description": "Default models for parallel execution"
         },
         "devForge.parallelExecution.strategy": {
           "type": "string",
-          "enum": [
-            "all",
-            "selected",
-            "smart"
-          ],
+          "enum": ["all", "selected", "smart"],
           "default": "smart",
           "description": "Model selection strategy for parallel execution"
         },
@@ -263,11 +207,7 @@
         },
         "devForge.aggregation.consensusMethod": {
           "type": "string",
-          "enum": [
-            "weighted",
-            "voting",
-            "best"
-          ],
+          "enum": ["weighted", "voting", "best"],
           "default": "weighted",
           "description": "Consensus generation method"
         },
@@ -302,24 +242,13 @@
           "items": {
             "type": "object",
             "properties": {
-              "id": {
-                "type": "string"
-              },
-              "name": {
-                "type": "string"
-              },
-              "path": {
-                "type": "string"
-              },
-              "enabled": {
-                "type": "boolean",
-                "default": true
-              },
+              "id": { "type": "string" },
+              "name": { "type": "string" },
+              "path": { "type": "string" },
+              "enabled": { "type": "boolean", "default": true },
               "permissions": {
                 "type": "array",
-                "items": {
-                  "type": "string"
-                }
+                "items": { "type": "string" }
               }
             }
           },
@@ -443,11 +372,7 @@
         },
         "devForge.imageGeneration.defaultSize": {
           "type": "string",
-          "enum": [
-            "1K",
-            "2K",
-            "4K"
-          ],
+          "enum": ["1K", "2K", "4K"],
           "default": "1K",
           "description": "Default image size"
         },
@@ -473,11 +398,7 @@
         },
         "devForge.ui.theme": {
           "type": "string",
-          "enum": [
-            "xibalba-dark",
-            "xibalba-light",
-            "custom"
-          ],
+          "enum": ["xibalba-dark", "xibalba-light", "custom"],
           "default": "xibalba-dark",
           "description": "UI theme"
         },
@@ -503,12 +424,7 @@
         },
         "devForge.logging.level": {
           "type": "string",
-          "enum": [
-            "debug",
-            "info",
-            "warn",
-            "error"
-          ],
+          "enum": ["debug", "info", "warn", "error"],
           "default": "info",
           "description": "Logging level"
         },
@@ -524,11 +440,7 @@
         },
         "devForge.security.apiKeyStorage": {
           "type": "string",
-          "enum": [
-            "secretStorage",
-            "keychain",
-            "env"
-          ],
+          "enum": ["secretStorage", "keychain", "env"],
           "default": "secretStorage",
           "description": "API key storage method"
         },
@@ -604,11 +516,13 @@
     "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
-    "@types/node": "^20.19.28",
-    "@types/vscode": "^1.108.1",
+    "@types/node": "^20.10.0",
+    "@types/vscode": "^1.84.0",
     "@typescript-eslint/eslint-plugin": "^6.13.0",
     "@typescript-eslint/parser": "^6.13.0",
     "eslint": "^8.54.0",
-    "typescript": "^5.9.3"
-  }
+    "typescript": "^5.3.3"
+  },
+  "dependencies": {}
 }
+
