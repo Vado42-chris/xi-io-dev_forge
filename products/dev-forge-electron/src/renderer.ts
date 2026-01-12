@@ -17,10 +17,12 @@ import { MultiagentView } from './components/multiagent-view';
 import { PromptPanel } from './components/prompt-panel';
 import { PersonaPanel } from './components/persona-panel';
 import { SprintPanel } from './components/sprint-panel';
+import { WargamingPanel } from './components/wargaming-panel';
 import { modelManager } from './model-manager';
 import { fireTeamsSystem } from './systems/fire-teams';
 import { personaSystem } from './systems/persona-system';
 import { sprintSystem } from './systems/sprint-system';
+import { wargamingSystem } from './systems/wargaming-system';
 import { MultiModelExecutor } from './services/multi-model-executor';
 import { SystemIntegration } from './services/system-integration';
 
@@ -84,6 +86,9 @@ async function initializeApp(): Promise<void> {
 
     // Initialize Sprint Panel
     await initializeSprintPanel();
+
+    // Initialize Wargaming Panel
+    await initializeWargamingPanel();
 
     // Initialize Multi-Model Executor
     initializeMultiModelExecutor();
@@ -325,6 +330,21 @@ async function initializeSprintPanel(): Promise<void> {
   } catch (error) {
     console.error('[Renderer] Sprint Panel initialization error:', error);
     updateStatus('Sprint Panel error', 5000);
+  }
+}
+
+/**
+ * Initialize Wargaming Panel
+ */
+async function initializeWargamingPanel(): Promise<void> {
+  try {
+    const wargamingPanel = new WargamingPanel('wargaming-panel-container', wargamingSystem);
+    wargamingPanel.render();
+    console.log('[Renderer] Wargaming Panel initialized');
+    updateStatus('Wargaming Panel ready', 2000);
+  } catch (error) {
+    console.error('[Renderer] Wargaming Panel initialization error:', error);
+    updateStatus('Wargaming Panel error', 5000);
   }
 }
 
