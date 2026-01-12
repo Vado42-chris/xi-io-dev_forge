@@ -14,8 +14,22 @@ import { PluginManagerPanel } from './ui/pluginManager';
 import { ModelsTreeDataProvider, PluginsTreeDataProvider } from './ui/treeViews';
 import { StatusBarManager } from './ui/statusBar';
 
+// Import services (using relative paths from extension to src)
+import { ModelProviderRegistry } from '../../../src/services/providers/modelProviderRegistry';
+import { OllamaProvider } from '../../../src/services/providers/ollamaProvider';
+import { GGUFProvider } from '../../../src/services/providers/ggufProvider';
+import { ApiProviderRegistry } from '../../../src/services/api/apiProviderRegistry';
+import { ApiKeyManager } from '../../../src/services/api/apiKeyManager';
+import { PluginManager } from '../../../src/services/plugins/pluginManager';
+
 let configManager: ConfigurationManager | undefined;
 let statusBarManager: StatusBarManager | undefined;
+let modelProviderRegistry: ModelProviderRegistry | undefined;
+let apiProviderRegistry: ApiProviderRegistry | undefined;
+let apiKeyManager: ApiKeyManager | undefined;
+let pluginManager: PluginManager | undefined;
+let modelsTreeProvider: ModelsTreeDataProvider | undefined;
+let pluginsTreeProvider: PluginsTreeDataProvider | undefined;
 
 /**
  * Extension activation
@@ -27,11 +41,41 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   configManager = new ConfigurationManager(context);
   await configManager.initialize();
 
+  // Initialize API key manager
+  apiKeyManager = new ApiKeyManager(context.secrets);
+
+  // Initialize provider registries
+  modelProviderRegistry = new ModelProviderRegistry();
+  apiProviderRegistry = new ApiProviderRegistry(apiKeyManager);
+
+  // Initialize and register providers based on settings
+  await initializeProviders();
+
+  // Initialize plugin manager
+  const pluginDirectory = configManager.getSetting<string>('plugins.pluginDirectory', '~/.dev-forge/plugins');
+  pluginManager = new PluginManager(
+    pluginDirectory.replace(/^~/, process.env.HOME || ''),
+    modelProviderRegistry,
+    apiProviderRegistry
+  );
+
+  // Initialize tree views
+  modelsTreeProvider = new ModelsTreeDataProvider(modelProviderRegistry);
+  pluginsTreeProvider = new PluginsTreeDataProvider(pluginManager);
+
+  // Register tree views
+  context.subscriptions.push(
+    vscode.window.createTreeView('devForgeModels', {
+      treeDataProvider: modelsTreeProvider
+    }),
+    vscode.window.createTreeView('devForgePlugins', {
+      treeDataProvider: pluginsTreeProvider
+    })
+  );
+
   // Initialize status bar
   statusBarManager = new StatusBarManager();
-  statusBarManager.updateModelStatus(null, null);
-  statusBarManager.updateProviderStatus(0);
-  statusBarManager.updatePluginStatus(0);
+  updateStatusBar();
 
   // Register commands
   registerCommands(context);
@@ -40,6 +84,9 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   vscode.workspace.onDidChangeConfiguration((e) => {
     if (e.affectsConfiguration('devForge')) {
       configManager?.reload();
+      updateStatusBar();
+      modelsTreeProvider?.refresh();
+      pluginsTreeProvider?.refresh();
       vscode.window.showInformationMessage('Dev Forge configuration updated');
     }
   });
@@ -52,13 +99,89 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 }
 
 /**
+ * Initialize model and API providers based on settings
+ */
+async function initializeProviders(): Promise<void> {
+  if (!configManager || !modelProviderRegistry || !apiProviderRegistry) {
+    return;
+  }
+
+  // Initialize Ollama provider if enabled
+  const ollamaEnabled = configManager.getSetting<boolean>('models.ollama.enabled', true);
+  if (ollamaEnabled) {
+    const ollamaBaseUrl = configManager.getSetting<string>('models.ollama.baseUrl', 'http://localhost:11434');
+    const ollamaProvider = new OllamaProvider({ baseUrl: ollamaBaseUrl });
+    await modelProviderRegistry.registerProvider(ollamaProvider);
+  }
+
+  // Initialize GGUF provider if enabled
+  const ggufEnabled = configManager.getSetting<boolean>('models.gguf.enabled', false);
+  if (ggufEnabled) {
+    const ggufDirectory = configManager.getSetting<string>('models.gguf.modelsDirectory', '~/.dev-forge/models/gguf');
+    const maxMemory = configManager.getSetting<number>('models.gguf.maxMemory', 4096);
+    const ggufProvider = new GGUFProvider({
+      modelsDirectory: ggufDirectory.replace(/^~/, process.env.HOME || ''),
+      maxMemory
+    });
+    await modelProviderRegistry.registerProvider(ggufProvider);
+  }
+
+  // Load plugins if enabled
+  const pluginsEnabled = configManager.getSetting<boolean>('plugins.enabled', true);
+  const autoLoad = configManager.getSetting<boolean>('plugins.autoLoad', true);
+  if (pluginsEnabled && autoLoad && pluginManager) {
+    await pluginManager.discoverPlugins();
+    await pluginManager.loadAllPlugins();
+  }
+}
+
+/**
+ * Update status bar with current state
+ */
+function updateStatusBar(): void {
+  if (!statusBarManager || !modelProviderRegistry || !apiProviderRegistry || !pluginManager) {
+    return;
+  }
+
+  // Update model status
+  const models = modelProviderRegistry.listAllModels();
+  if (models.length > 0) {
+    const firstModel = models[0];
+    statusBarManager.updateModelStatus(firstModel.name, firstModel.provider);
+  }
+
+  // Update provider status
+  const providers = apiProviderRegistry.getAllProviders();
+  statusBarManager.updateProviderStatus(providers.length);
+
+  // Update plugin status
+  const plugins = pluginManager.getAllPlugins();
+  statusBarManager.updatePluginStatus(plugins.length);
+}
+
+/**
  * Extension deactivation
  */
-export function deactivate(): void {
+export async function deactivate(): Promise<void> {
   configManager?.dispose();
   configManager = undefined;
   statusBarManager?.dispose();
   statusBarManager = undefined;
+  // ModelProviderRegistry doesn't have dispose, but providers do
+  if (modelProviderRegistry) {
+    const providers = modelProviderRegistry.getAllProviders();
+    for (const provider of providers) {
+      if (provider.dispose) {
+        await provider.dispose();
+      }
+    }
+  }
+  modelProviderRegistry = undefined;
+  apiProviderRegistry = undefined;
+  apiKeyManager = undefined;
+  pluginManager = undefined;
+  modelsTreeProvider = undefined;
+  pluginsTreeProvider = undefined;
 }
 
 /**
@@ -72,9 +195,11 @@ function registerCommands(context: vscode.ExtensionContext): void {
 
   // Model commands
   const selectModelCommand = vscode.commands.registerCommand('devForge.models.select', async () => {
-    // TODO: Get modelProviderRegistry from extension context
-    // ModelSelectorPanel.createOrShow(context.extensionUri, modelProviderRegistry);
-    vscode.window.showInformationMessage('Model selector (coming soon - needs ModelProviderRegistry)');
+    if (modelProviderRegistry) {
+      ModelSelectorPanel.createOrShow(context.extensionUri, modelProviderRegistry);
+    } else {
+      vscode.window.showErrorMessage('Model provider registry not initialized');
+    }
   });
 
   const loadModelCommand = vscode.commands.registerCommand('devForge.models.load', async () => {
@@ -89,29 +214,42 @@ function registerCommands(context: vscode.ExtensionContext): void {
 
   // GGUF commands
   const scanGGUFCommand = vscode.commands.registerCommand('devForge.gguf.scan', async () => {
-    // TODO: Get ggufProvider from extension context
-    // GGUFBrowserPanel.createOrShow(context.extensionUri, ggufProvider);
-    vscode.window.showInformationMessage('GGUF browser (coming soon - needs GGUFProvider)');
+    if (modelProviderRegistry) {
+      const ggufProvider = modelProviderRegistry.getProvider('gguf') as GGUFProvider;
+      if (ggufProvider) {
+        GGUFBrowserPanel.createOrShow(context.extensionUri, ggufProvider);
+      } else {
+        vscode.window.showWarningMessage('GGUF provider not enabled. Enable it in settings first.');
+      }
+    } else {
+      vscode.window.showErrorMessage('Model provider registry not initialized');
+    }
   });
 
   // API provider commands
   const addApiProviderCommand = vscode.commands.registerCommand('devForge.apiProviders.add', async () => {
-    // TODO: Get apiProviderRegistry and apiKeyManager from extension context
-    // ApiProviderManagerPanel.createOrShow(context.extensionUri, apiProviderRegistry, apiKeyManager);
-    vscode.window.showInformationMessage('API provider manager (coming soon - needs ApiProviderRegistry)');
+    if (apiProviderRegistry && apiKeyManager) {
+      ApiProviderManagerPanel.createOrShow(context.extensionUri, apiProviderRegistry, apiKeyManager);
+    } else {
+      vscode.window.showErrorMessage('API provider registry not initialized');
+    }
   });
 
   const configureApiProviderCommand = vscode.commands.registerCommand('devForge.apiProviders.configure', async () => {
-    // TODO: Get apiProviderRegistry and apiKeyManager from extension context
-    // ApiProviderManagerPanel.createOrShow(context.extensionUri, apiProviderRegistry, apiKeyManager);
-    vscode.window.showInformationMessage('API provider manager (coming soon - needs ApiProviderRegistry)');
+    if (apiProviderRegistry && apiKeyManager) {
+      ApiProviderManagerPanel.createOrShow(context.extensionUri, apiProviderRegistry, apiKeyManager);
+    } else {
+      vscode.window.showErrorMessage('API provider registry not initialized');
+    }
   });
 
   // Plugin commands
   const managePluginsCommand = vscode.commands.registerCommand('devForge.plugins.manage', async () => {
-    // TODO: Get pluginManager from extension context
-    // PluginManagerPanel.createOrShow(context.extensionUri, pluginManager);
-    vscode.window.showInformationMessage('Plugin manager (coming soon - needs PluginManager)');
+    if (pluginManager) {
+      PluginManagerPanel.createOrShow(context.extensionUri, pluginManager);
+    } else {
+      vscode.window.showErrorMessage('Plugin manager not initialized');
+    }
   });
 
   const installPluginCommand = vscode.commands.registerCommand('devForge.plugins.install', async () => {
