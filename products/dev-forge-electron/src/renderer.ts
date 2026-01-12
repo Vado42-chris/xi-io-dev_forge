@@ -14,6 +14,7 @@ import { ModelPanel } from './components/model-panel';
 import { PluginPanel } from './components/plugin-panel';
 import { FireTeamsPanel } from './components/fire-teams-panel';
 import { MultiagentView } from './components/multiagent-view';
+import { PromptPanel } from './components/prompt-panel';
 import { modelManager } from './model-manager';
 import { fireTeamsSystem } from './systems/fire-teams';
 import { MultiModelExecutor } from './services/multi-model-executor';
@@ -82,6 +83,9 @@ async function initializeApp(): Promise<void> {
 
     // Initialize Multiagent View
     await initializeMultiagentView();
+
+    // Initialize Prompt Panel
+    await initializePromptPanel();
 
     // Set up sidebar tabs
     setupSidebarTabs();
@@ -339,6 +343,30 @@ async function initializeMultiagentView(): Promise<void> {
 function initializeMultiModelExecutor(): void {
   multiModelExecutor = new MultiModelExecutor(modelManager);
   console.log('[Renderer] Multi-Model Executor initialized');
+}
+
+/**
+ * Initialize Prompt Panel
+ */
+async function initializePromptPanel(): Promise<void> {
+  try {
+    if (!multiModelExecutor) {
+      console.warn('[Renderer] Multi-Model Executor not initialized yet');
+      return;
+    }
+
+    const promptPanel = new PromptPanel('prompt-panel-container', multiModelExecutor);
+    promptPanel.render();
+    console.log('[Renderer] Prompt Panel initialized');
+    
+    // Make prompt panel accessible globally for keyboard shortcuts
+    (window as any).__promptPanel = promptPanel;
+    
+    updateStatus('Prompt Panel ready (Ctrl+K)', 2000);
+  } catch (error) {
+    console.error('[Renderer] Prompt Panel initialization error:', error);
+    updateStatus('Prompt Panel error', 5000);
+  }
 }
 
 /**
