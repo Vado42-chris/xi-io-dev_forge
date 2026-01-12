@@ -14,6 +14,7 @@ import dotenv from 'dotenv';
 import { logger } from './utils/logger';
 import { errorHandler } from './middleware/errorHandler';
 import { rateLimiter } from './middleware/rateLimiter';
+import { testConnection } from './config/database';
 
 // Load environment variables
 dotenv.config();
@@ -43,12 +44,14 @@ app.get('/health', (req, res) => {
 });
 
 // API Routes
-// TODO: Import and use route handlers
-// app.use('/api/auth', authRoutes);
+import authRoutes from './routes/auth';
+// TODO: Import and use other route handlers
 // app.use('/api/payments', paymentRoutes);
 // app.use('/api/licenses', licenseRoutes);
 // app.use('/api/extensions', extensionRoutes);
 // app.use('/api/support', supportRoutes);
+
+app.use('/api/auth', authRoutes);
 
 // 404 handler
 app.use((req, res) => {
@@ -62,10 +65,13 @@ app.use((req, res) => {
 app.use(errorHandler);
 
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   logger.info(`🚀 Dev Forge Backend running on port ${PORT}`);
   logger.info(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
   logger.info(`🔗 Health check: http://localhost:${PORT}/health`);
+  
+  // Test database connection
+  await testConnection();
 });
 
 export default app;
