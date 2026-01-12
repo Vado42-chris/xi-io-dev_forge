@@ -56,12 +56,14 @@ import paymentRoutes from './routes/payments';
 import licenseRoutes from './routes/licenses';
 import extensionRoutes from './routes/extensions';
 import supportRoutes from './routes/support';
+import extensionRegistryRoutes from './routes/extensionRegistry';
 
 app.use('/api/auth', authRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/licenses', licenseRoutes);
 app.use('/api/extensions', extensionRoutes);
 app.use('/api/support', supportRoutes);
+app.use('/api/registry', extensionRegistryRoutes);
 
 // 404 handler
 app.use((req, res) => {

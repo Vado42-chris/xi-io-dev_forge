@@ -97,6 +97,7 @@ export async function runMigrations(): Promise<void> {
     const migrationsDir = join(__dirname, '../../migrations');
     const migrationFiles = [
       { id: '001', name: '001_initial_schema.sql' },
+      { id: '002', name: '002_extension_registry.sql' },
       // Add more migrations here as they are created
     ];
 
