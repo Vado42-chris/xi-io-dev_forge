@@ -6,6 +6,7 @@
 
 import { Router } from 'express';
 import { ExtensionService } from '../../services/extension/extensionService';
+import { authenticate } from '../middleware/authMiddleware';
 
 const router = Router();
 const extensionService = new ExtensionService();
@@ -187,9 +188,9 @@ router.get('/author/:authorId', async (req, res) => {
 
 /**
  * POST /api/extensions
- * Create a new extension (requires authentication - will add middleware later)
+ * Create a new extension (requires authentication)
  */
-router.post('/', async (req, res) => {
+router.post('/', authenticate, async (req, res) => {
   try {
     const { name, slug, description, version, author_id, category, tags, price, is_free } = req.body;
 
@@ -263,9 +264,9 @@ router.post('/:id/download', async (req, res) => {
 
 /**
  * POST /api/extensions/:id/approve
- * Approve extension (admin only - will add auth middleware later)
+ * Approve extension (admin only - requires authentication)
  */
-router.post('/:id/approve', async (req, res) => {
+router.post('/:id/approve', authenticate, async (req, res) => {
   try {
     const { id } = req.params;
     const approved = await extensionService.approveExtension(id);
@@ -295,9 +296,9 @@ router.post('/:id/approve', async (req, res) => {
 
 /**
  * POST /api/extensions/:id/reject
- * Reject extension (admin only - will add auth middleware later)
+ * Reject extension (admin only - requires authentication)
  */
-router.post('/:id/reject', async (req, res) => {
+router.post('/:id/reject', authenticate, async (req, res) => {
   try {
     const { id } = req.params;
     const rejected = await extensionService.rejectExtension(id);

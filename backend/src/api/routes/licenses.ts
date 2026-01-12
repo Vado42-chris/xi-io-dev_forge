@@ -6,6 +6,7 @@
 
 import { Router } from 'express';
 import { LicenseService } from '../../services/license/licenseService';
+import { authenticate } from '../middleware/authMiddleware';
 
 const router = Router();
 const licenseService = new LicenseService();
@@ -88,9 +89,9 @@ router.post('/validate', async (req, res) => {
 
 /**
  * POST /api/licenses/create
- * Create a new license (admin only - will add auth middleware later)
+ * Create a new license (admin only - requires authentication)
  */
-router.post('/create', async (req, res) => {
+router.post('/create', authenticate, async (req, res) => {
   try {
     const { user_id, tier, expires_at } = req.body;
 
@@ -200,9 +201,9 @@ router.post('/upgrade', async (req, res) => {
 
 /**
  * POST /api/licenses/revoke
- * Revoke a license (admin only - will add auth middleware later)
+ * Revoke a license (admin only - requires authentication)
  */
-router.post('/revoke', async (req, res) => {
+router.post('/revoke', authenticate, async (req, res) => {
   try {
     const { license_key } = req.body;
 

@@ -23,7 +23,18 @@ logger.info('Dev Forge Backend starting...');
 
 // Initialize database connection
 const db = getDatabase();
-db.connect().catch(err => {
+db.connect().then(async () => {
+  // Run migrations
+  try {
+    const { MigrationRunner } = await import('./database/migrations');
+    const { migrations } = await import('./database/migrations');
+    const runner = new MigrationRunner();
+    await runner.runMigrations(migrations);
+  } catch (error: any) {
+    logger.error('Migration error', { error: error.message });
+    // Don't exit on migration error - might be first run
+  }
+}).catch(err => {
   logger.error('Database connection error', { error: err });
   process.exit(1);
 });
