@@ -166,21 +166,24 @@ export class PersonaPanel {
    * Show activate persona dialog
    */
   private showActivateDialog(personaId: string): void {
-    const models = modelManager.getEnabledModels();
-    if (models.length === 0) {
-      alert('No models available');
-      return;
-    }
+    // Dynamically import modelManager to avoid circular dependencies
+    import('../model-manager').then(({ modelManager }) => {
+      const models = modelManager.getEnabledModels();
+      if (models.length === 0) {
+        alert('No models available');
+        return;
+      }
 
-    // Simple activation - use first available model
-    const firstModel = models[0];
-    const config: PersonaConfig = {
-      personaId,
-      modelId: firstModel.id,
-    };
+      // Simple activation - use first available model
+      const firstModel = models[0];
+      const config: PersonaConfig = {
+        personaId,
+        modelId: firstModel.id,
+      };
 
-    this.personaSystem.activatePersona(config);
-    alert(`Persona activated for ${firstModel.name}`);
+      this.personaSystem.activatePersona(config);
+      alert(`Persona activated for ${firstModel.name}`);
+    });
   }
 
   /**
