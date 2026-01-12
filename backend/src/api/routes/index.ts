@@ -5,6 +5,7 @@
  */
 
 import { Router } from 'express';
+import authRoutes from './auth';
 
 const router = Router();
 
@@ -25,7 +26,7 @@ router.get('/', (req, res) => {
     version: '0.1.0',
     endpoints: {
       health: '/api/health',
-      auth: '/api/auth (coming soon)',
+      auth: '/api/auth',
       users: '/api/users (coming soon)',
       licenses: '/api/licenses (coming soon)',
       extensions: '/api/extensions (coming soon)',
@@ -33,6 +34,9 @@ router.get('/', (req, res) => {
     }
   });
 });
+
+// Auth routes
+router.use('/auth', authRoutes);
 
 export default router;
 
