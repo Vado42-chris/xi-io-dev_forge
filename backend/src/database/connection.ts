@@ -6,7 +6,8 @@
  */
 
 import { Pool, PoolConfig } from 'pg';
-import Database from 'better-sqlite3';
+// SQLite support - will be added when needed
+// import Database from 'better-sqlite3';
 
 export interface DatabaseConfig {
   type: 'postgresql' | 'sqlite';
@@ -16,7 +17,7 @@ export interface DatabaseConfig {
 
 export class DatabaseConnection {
   private pool: Pool | null = null;
-  private sqlite: Database.Database | null = null;
+  private sqlite: any = null; // SQLite Database type - will be typed when better-sqlite3 is added
   private config: DatabaseConfig;
   private type: 'postgresql' | 'sqlite';
 
@@ -64,10 +65,10 @@ export class DatabaseConnection {
    * Connect to SQLite
    */
   private connectSQLite(): void {
-    const dbPath = this.config.path || process.env.DATABASE_PATH || './data/dev-forge.db';
-    this.sqlite = new Database(dbPath);
-    this.sqlite.pragma('journal_mode = WAL');
-    console.log('[Database] SQLite connection successful');
+    // SQLite support will be added when better-sqlite3 is available
+    // For now, use PostgreSQL
+    console.log('[Database] SQLite not available, using PostgreSQL');
+    throw new Error('SQLite support not yet implemented. Please use PostgreSQL.');
   }
 
   /**
