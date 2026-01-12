@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../../contexts/AuthContext'
+import { authService } from '../../services/authService'
 import type { ApiError } from '../../services/api'
 import '../styles/SignupPage.css'
 
@@ -34,7 +35,7 @@ export function SignupPage() {
 
     try {
       // Register and auto-login
-      const response = await authService.register(formData)
+      await authService.register(formData)
       await login(formData.email, formData.password)
       navigate('/dashboard')
     } catch (err) {
