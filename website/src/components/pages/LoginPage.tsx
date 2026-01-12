@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
-import { authService } from '../../services/authService'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
+import { useAuth } from '../../contexts/AuthContext'
 import type { ApiError } from '../../services/api'
 import '../styles/LoginPage.css'
 
@@ -10,6 +10,8 @@ export function LoginPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+  const location = useLocation()
+  const { login } = useAuth()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -17,8 +19,10 @@ export function LoginPage() {
     setLoading(true)
 
     try {
-      await authService.login({ email, password })
-      navigate('/dashboard')
+      await login(email, password)
+      // Redirect to dashboard or the page they were trying to access
+      const from = (location.state as any)?.from?.pathname || '/dashboard'
+      navigate(from, { replace: true })
     } catch (err) {
       const apiError = err as ApiError
       setError(apiError.message || 'Login failed')

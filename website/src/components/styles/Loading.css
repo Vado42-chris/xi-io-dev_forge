@@ -1,0 +1,13 @@
+.loading-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 400px;
+}
+
+.loading-spinner {
+  font-size: 1.25rem;
+  color: var(--xibalba-text-secondary);
+  font-family: var(--font-tech);
+}
+

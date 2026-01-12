@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-import { authService } from '../../services/authService'
+import { useAuth } from '../../contexts/AuthContext'
 import type { ApiError } from '../../services/api'
 import '../styles/SignupPage.css'
 
@@ -18,6 +18,7 @@ export function SignupPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+  const { login } = useAuth()
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
@@ -32,7 +33,9 @@ export function SignupPage() {
     setLoading(true)
 
     try {
-      await authService.register(formData)
+      // Register and auto-login
+      const response = await authService.register(formData)
+      await login(formData.email, formData.password)
       navigate('/dashboard')
     } catch (err) {
       const apiError = err as ApiError

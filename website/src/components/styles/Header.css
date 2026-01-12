@@ -44,6 +44,12 @@
   align-items: center;
 }
 
+.user-info {
+  color: var(--xibalba-text-secondary);
+  font-size: 0.95rem;
+  padding: 0 8px;
+}
+
 @media (max-width: 768px) {
   .nav {
     display: none;
