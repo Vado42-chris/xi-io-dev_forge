@@ -14,6 +14,7 @@ import dotenv from 'dotenv';
 import { logger } from './utils/logger';
 import { errorHandler } from './middleware/errorHandler';
 import { rateLimiter } from './middleware/rateLimiter';
+import { requestLogger } from './middleware/requestLogger';
 import { testConnection } from './config/database';
 import { runMigrations } from './config/migrations';
 
@@ -32,6 +33,7 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(requestLogger); // Log all requests
 app.use(rateLimiter);
 
 // Health check
