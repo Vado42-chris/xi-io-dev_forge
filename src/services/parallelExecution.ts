@@ -9,7 +9,6 @@
  * - Result aggregation
  */
 
-import { ollamaService, OllamaRequest, OllamaResponse } from './ollamaService';
 import { modelManager, ModelMetadata } from './modelManager';
 
 export interface ParallelExecutionRequest {
@@ -360,7 +359,15 @@ export class ParallelExecutionService {
           reject(new Error('Stream timeout'));
         }, timeout);
 
-        ollamaService.generateStream(ollamaRequest, (chunk) => {
+        // TODO: Implement streaming via provider system
+        // For now, use non-streaming generation
+        modelManager.generate(model.id, request.prompt, request.options).then(response => {
+          onChunk?.(response);
+        }).catch(error => {
+          console.error(`[ParallelExecution] Stream error for ${model.id}:`, error);
+        });
+        // Placeholder - streaming will be implemented via provider system
+        const _streamPlaceholder = async (ollamaRequest: any, onChunk: any) => {
           fullResponse += chunk;
           onChunk(model.id, chunk);
         })
