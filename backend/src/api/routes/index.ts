@@ -10,6 +10,7 @@ import licenseRoutes from './licenses';
 import extensionRoutes from './extensions';
 import supportRoutes from './support';
 import analyticsRoutes from './analytics';
+import developerRoutes from './developers';
 
 const router = Router();
 
@@ -35,6 +36,7 @@ router.get('/', (req, res) => {
       extensions: '/api/extensions',
       support: '/api/support',
       analytics: '/api/analytics',
+      developers: '/api/developers',
       users: '/api/users (coming soon)',
     }
   });
@@ -54,6 +56,9 @@ router.use('/support', supportRoutes);
 
 // Analytics routes
 router.use('/analytics', analyticsRoutes);
+
+// Developer routes
+router.use('/developers', developerRoutes);
 
 export default router;
 
