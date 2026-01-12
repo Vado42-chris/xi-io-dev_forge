@@ -49,13 +49,13 @@ const apiProviderManager_1 = require("./ui/apiProviderManager");
 const pluginManager_1 = require("./ui/pluginManager");
 const treeViews_1 = require("./ui/treeViews");
 const statusBar_1 = require("./ui/statusBar");
-// Import services (using relative paths from extension to src)
-const modelProviderRegistry_1 = require("../../../src/services/providers/modelProviderRegistry");
-const ollamaProvider_1 = require("../../../src/services/providers/ollamaProvider");
-const ggufProvider_1 = require("../../../src/services/providers/ggufProvider");
-const apiProviderRegistry_1 = require("../../../src/services/api/apiProviderRegistry");
-const apiKeyManager_1 = require("../../../src/services/api/apiKeyManager");
-const pluginManager_2 = require("../../../src/services/plugins/pluginManager");
+// Import services (using path alias)
+const modelProviderRegistry_1 = require("@services/providers/modelProviderRegistry");
+const ollamaProvider_1 = require("@services/providers/ollamaProvider");
+const ggufProvider_1 = require("@services/providers/ggufProvider");
+const apiProviderRegistry_1 = require("@services/api/apiProviderRegistry");
+const apiKeyManager_1 = require("@services/api/apiKeyManager");
+const pluginManager_2 = require("@services/plugins/pluginManager");
 let configManager;
 let statusBarManager;
 let modelProviderRegistry;
@@ -80,8 +80,9 @@ async function activate(context) {
     // Initialize and register providers based on settings
     await initializeProviders();
     // Initialize plugin manager
-    const pluginDirectory = configManager.getSetting('plugins.pluginDirectory', '~/.dev-forge/plugins');
-    pluginManager = new pluginManager_2.PluginManager(pluginDirectory.replace(/^~/, process.env.HOME || ''), modelProviderRegistry, apiProviderRegistry);
+    // Note: PluginManager constructor needs ExtensionContext, but we'll create a minimal one
+    // For now, we'll pass the context and let PluginManager handle it
+    pluginManager = new pluginManager_2.PluginManager(context, modelProviderRegistry, apiProviderRegistry);
     // Initialize tree views
     modelsTreeProvider = new treeViews_1.ModelsTreeDataProvider(modelProviderRegistry);
     pluginsTreeProvider = new treeViews_1.PluginsTreeDataProvider(pluginManager);
@@ -168,12 +169,20 @@ function updateStatusBar() {
 /**
  * Extension deactivation
  */
-function deactivate() {
+async function deactivate() {
     configManager?.dispose();
     configManager = undefined;
     statusBarManager?.dispose();
     statusBarManager = undefined;
-    modelProviderRegistry?.dispose();
+    // ModelProviderRegistry doesn't have dispose, but providers do
+    if (modelProviderRegistry) {
+        const providers = modelProviderRegistry.getAllProviders();
+        for (const provider of providers) {
+            if (provider.dispose) {
+                await provider.dispose();
+            }
+        }
+    }
     modelProviderRegistry = undefined;
     apiProviderRegistry = undefined;
     apiKeyManager = undefined;

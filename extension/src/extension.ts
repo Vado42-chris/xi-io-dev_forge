@@ -14,13 +14,13 @@ import { PluginManagerPanel } from './ui/pluginManager';
 import { ModelsTreeDataProvider, PluginsTreeDataProvider } from './ui/treeViews';
 import { StatusBarManager } from './ui/statusBar';
 
-// Import services (using relative paths from extension to src)
-import { ModelProviderRegistry } from '../../../src/services/providers/modelProviderRegistry';
-import { OllamaProvider } from '../../../src/services/providers/ollamaProvider';
-import { GGUFProvider } from '../../../src/services/providers/ggufProvider';
-import { ApiProviderRegistry } from '../../../src/services/api/apiProviderRegistry';
-import { ApiKeyManager } from '../../../src/services/api/apiKeyManager';
-import { PluginManager } from '../../../src/services/plugins/pluginManager';
+// Import services (using path alias)
+import { ModelProviderRegistry } from '@services/providers/modelProviderRegistry';
+import { OllamaProvider } from '@services/providers/ollamaProvider';
+import { GGUFProvider } from '@services/providers/ggufProvider';
+import { ApiProviderRegistry } from '@services/api/apiProviderRegistry';
+import { ApiKeyManager } from '@services/api/apiKeyManager';
+import { PluginManager } from '@services/plugins/pluginManager';
 
 let configManager: ConfigurationManager | undefined;
 let statusBarManager: StatusBarManager | undefined;
@@ -52,9 +52,10 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   await initializeProviders();
 
   // Initialize plugin manager
-  const pluginDirectory = configManager.getSetting<string>('plugins.pluginDirectory', '~/.dev-forge/plugins');
+  // Note: PluginManager constructor needs ExtensionContext, but we'll create a minimal one
+  // For now, we'll pass the context and let PluginManager handle it
   pluginManager = new PluginManager(
-    pluginDirectory.replace(/^~/, process.env.HOME || ''),
+    context,
     modelProviderRegistry,
     apiProviderRegistry
   );
