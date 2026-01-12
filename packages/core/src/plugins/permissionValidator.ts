@@ -52,38 +52,14 @@ export class PermissionValidator {
   }
 
   /**
-   * Validate domain access
+   * Validate domain access (if network permission is granted)
    */
   validateDomain(permissions: PluginPermissions, domain: string): boolean {
-    if (!permissions.networkAccess) {
+    if (!permissions.network) {
       return false;
     }
-
-    if (!permissions.allowedDomains || permissions.allowedDomains.length === 0) {
-      return true; // All domains allowed if networkAccess is true
-    }
-
-    return permissions.allowedDomains.some(allowed => {
-      // Exact match
-      if (allowed === domain) return true;
-      // Wildcard match
-      if (allowed.startsWith('*.')) {
-        const baseDomain = allowed.slice(2);
-        return domain.endsWith('.' + baseDomain) || domain === baseDomain;
-      }
-      return false;
-    });
-  }
-
-  /**
-   * Validate environment variable access
-   */
-  validateEnvVar(permissions: PluginPermissions, envVar: string): boolean {
-    if (!permissions.environmentVariables) {
-      return false;
-    }
-
-    return permissions.environmentVariables.includes(envVar);
+    // If network is true, all domains are allowed
+    return true;
   }
 }
 

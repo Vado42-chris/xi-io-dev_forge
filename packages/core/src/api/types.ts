@@ -5,9 +5,8 @@
  */
 
 import { GenerateRequest, GenerateResponse, StreamChunk } from '../types';
-
-// Re-export types that are shared but defined in core types
-export type { GenerateOptions, HealthStatus } from '../types';
+// Import types from core (use type-only imports to avoid conflicts)
+import type { GenerateOptions as CoreGenerateOptions, HealthStatus as CoreHealthStatus } from '../types';
 
 /**
  * API Provider Types
