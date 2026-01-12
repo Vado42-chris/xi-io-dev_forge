@@ -48,13 +48,13 @@ import authRoutes from './routes/auth';
 import paymentRoutes from './routes/payments';
 import licenseRoutes from './routes/licenses';
 import extensionRoutes from './routes/extensions';
-// TODO: Import and use other route handlers
-// app.use('/api/support', supportRoutes);
+import supportRoutes from './routes/support';
 
 app.use('/api/auth', authRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/licenses', licenseRoutes);
 app.use('/api/extensions', extensionRoutes);
+app.use('/api/support', supportRoutes);
 
 // 404 handler
 app.use((req, res) => {

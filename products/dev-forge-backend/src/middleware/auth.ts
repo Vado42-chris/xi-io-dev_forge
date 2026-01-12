@@ -56,7 +56,7 @@ export function authenticate(
 }
 
 /**
- * Require specific role
+ * Require specific role(s)
  */
 export function requireRole(...roles: string[]) {
   return (req: AuthRequest, res: Response, next: NextFunction): void => {
