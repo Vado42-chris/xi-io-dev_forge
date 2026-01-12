@@ -155,6 +155,13 @@ function initializeApp(): void {
   if (!fs.existsSync(configPath)) {
     fs.mkdirSync(configPath, { recursive: true });
   }
+
+  // Create database directory
+  const dbPath = path.join(appDataPath, 'dev-forge.db');
+  console.log(`[Main] Database path: ${dbPath}`);
+  
+  // Initialize SQLite storage (will be done in renderer or separate service)
+  // For now, just ensure directory exists
 }
 
 /**

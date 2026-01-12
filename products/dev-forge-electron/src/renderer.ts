@@ -7,10 +7,15 @@
 
 import { initializeMonacoEditor, setEditor, openFileInEditor } from './monaco-setup';
 import { FileExplorer } from './file-explorer';
+import { applyBranding, removeMicrosoftBranding } from './branding';
 
 // Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', async () => {
   console.log('[Renderer] Dev Forge starting...');
+
+  // Apply branding
+  applyBranding();
+  removeMicrosoftBranding();
 
   // Initialize app
   await initializeApp();
