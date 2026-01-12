@@ -10,6 +10,8 @@ import { FileExplorer } from './file-explorer';
 import { applyBranding, removeMicrosoftBranding } from './branding';
 import { StatusManager } from './status-manager';
 import { AppConfigManager } from './app-config';
+import { ModelPanel } from './components/model-panel';
+import { modelManager } from './model-manager';
 
 // Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', async () => {
@@ -56,6 +58,12 @@ async function initializeApp(): Promise<void> {
 
     // Initialize File Explorer
     await initializeFileExplorer();
+
+    // Initialize Model Panel
+    await initializeModelPanel();
+
+    // Set up sidebar tabs
+    setupSidebarTabs();
 
   } catch (error) {
     console.error('[Renderer] Initialization error:', error);
@@ -199,6 +207,47 @@ let appConfig: AppConfigManager | null = null;
  */
 function initializeStatusManager(): void {
   statusManager = new StatusManager();
+}
+
+/**
+ * Initialize Model Panel
+ */
+async function initializeModelPanel(): Promise<void> {
+  try {
+    const modelPanel = new ModelPanel('model-panel-container', modelManager);
+    modelPanel.render();
+    console.log('[Renderer] Model Panel initialized');
+    updateStatus('Model Panel ready', 2000);
+  } catch (error) {
+    console.error('[Renderer] Model Panel initialization error:', error);
+    updateStatus('Model Panel error', 5000);
+  }
+}
+
+/**
+ * Set up sidebar tabs
+ */
+function setupSidebarTabs(): void {
+  const tabs = document.querySelectorAll('.sidebar-tab');
+  const panels = document.querySelectorAll('.sidebar-panel');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const targetTab = tab.getAttribute('data-tab');
+      
+      // Update tab states
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      
+      // Update panel states
+      panels.forEach(p => p.classList.remove('active'));
+      const targetPanel = document.getElementById(`${targetTab}-panel-container`) || 
+                         document.querySelector(`[data-panel="${targetTab}"]`);
+      if (targetPanel) {
+        targetPanel.classList.add('active');
+      }
+    });
+  });
 }
 
 /**
