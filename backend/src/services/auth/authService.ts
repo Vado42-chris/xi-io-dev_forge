@@ -6,7 +6,7 @@
 
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { getDatabase } from '../../database/connection';
+import { UserModel, UserRow } from '../../database/models/userModel';
 
 export interface User {
   id: string;
@@ -39,11 +39,12 @@ export interface AuthResult {
 }
 
 export class AuthService {
-  private db = getDatabase();
+  private userModel: UserModel;
   private jwtSecret: string;
   private jwtExpiresIn: string;
 
   constructor() {
+    this.userModel = new UserModel();
     this.jwtSecret = process.env.JWT_SECRET || 'dev-secret-change-in-production';
     this.jwtExpiresIn = process.env.JWT_EXPIRES_IN || '7d';
   }
@@ -54,7 +55,7 @@ export class AuthService {
   async register(data: RegisterData): Promise<AuthResult> {
     try {
       // Check if user exists
-      const existingUser = await this.findUserByEmail(data.email);
+      const existingUser = await this.userModel.findByEmail(data.email);
       if (existingUser) {
         return {
           success: false,
@@ -63,7 +64,7 @@ export class AuthService {
       }
 
       // Check if username exists
-      const existingUsername = await this.findUserByUsername(data.username);
+      const existingUsername = await this.userModel.findByUsername(data.username);
       if (existingUsername) {
         return {
           success: false,
@@ -75,7 +76,7 @@ export class AuthService {
       const passwordHash = await bcrypt.hash(data.password, 10);
 
       // Create user
-      const userId = await this.createUser({
+      const userId = await this.userModel.create({
         email: data.email,
         username: data.username,
         password_hash: passwordHash,
@@ -87,7 +88,7 @@ export class AuthService {
       const token = this.generateToken(userId, data.email);
 
       // Get user (without password)
-      const user = await this.getUserById(userId);
+      const user = await this.userModel.findById(userId);
       if (!user) {
         return {
           success: false,
@@ -122,7 +123,7 @@ export class AuthService {
   async login(data: LoginData): Promise<AuthResult> {
     try {
       // Find user
-      const user = await this.findUserByEmail(data.email);
+      const user = await this.userModel.findByEmail(data.email);
       if (!user) {
         return {
           success: false,
@@ -140,7 +141,7 @@ export class AuthService {
       }
 
       // Update last login
-      await this.updateLastLogin(user.id);
+      await this.userModel.updateLastLogin(user.id);
 
       // Generate token
       const token = this.generateToken(user.id, user.email);
@@ -197,51 +198,5 @@ export class AuthService {
     return jwt.sign(payload, this.jwtSecret, options);
   }
 
-  /**
-   * Find user by email
-   */
-  private async findUserByEmail(email: string): Promise<User | null> {
-    // Implementation depends on database type
-    // For now, return null (will implement with actual DB queries)
-    return null;
-  }
-
-  /**
-   * Find user by username
-   */
-  private async findUserByUsername(username: string): Promise<User | null> {
-    // Implementation depends on database type
-    return null;
-  }
-
-  /**
-   * Create user
-   */
-  private async createUser(data: {
-    email: string;
-    username: string;
-    password_hash: string;
-    first_name?: string;
-    last_name?: string;
-  }): Promise<string> {
-    // Implementation depends on database type
-    // For now, return placeholder
-    return 'placeholder-user-id';
-  }
-
-  /**
-   * Get user by ID
-   */
-  private async getUserById(userId: string): Promise<User | null> {
-    // Implementation depends on database type
-    return null;
-  }
-
-  /**
-   * Update last login
-   */
-  private async updateLastLogin(userId: string): Promise<void> {
-    // Implementation depends on database type
-  }
 }
 
