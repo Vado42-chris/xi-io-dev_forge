@@ -9,6 +9,71 @@ import { app, BrowserWindow, ipcMain } from 'electron';
 import * as path from 'path';
 import * as fs from 'fs';
 
+// IPC handlers for file system
+ipcMain.handle('fs:readFile', async (_, filePath: string) => {
+  try {
+    const data = await fs.promises.readFile(filePath, 'utf-8');
+    return data;
+  } catch (error: any) {
+    throw new Error(`Failed to read file: ${error.message}`);
+  }
+});
+
+ipcMain.handle('fs:writeFile', async (_, filePath: string, data: string) => {
+  try {
+    await fs.promises.writeFile(filePath, data, 'utf-8');
+  } catch (error: any) {
+    throw new Error(`Failed to write file: ${error.message}`);
+  }
+});
+
+ipcMain.handle('fs:readDir', async (_, dirPath: string) => {
+  try {
+    const entries = await fs.promises.readdir(dirPath, { withFileTypes: true });
+    return entries.map(entry => entry.name);
+  } catch (error: any) {
+    throw new Error(`Failed to read directory: ${error.message}`);
+  }
+});
+
+// IPC handlers for configuration
+const configPath = path.join(app.getPath('userData'), 'dev-forge', 'config', 'config.json');
+let configCache: Record<string, any> = {};
+
+async function loadConfig(): Promise<void> {
+  try {
+    if (fs.existsSync(configPath)) {
+      const data = await fs.promises.readFile(configPath, 'utf-8');
+      configCache = JSON.parse(data);
+    }
+  } catch (error) {
+    console.error('[Main] Failed to load config:', error);
+  }
+}
+
+async function saveConfig(): Promise<void> {
+  try {
+    const dir = path.dirname(configPath);
+    if (!fs.existsSync(dir)) {
+      await fs.promises.mkdir(dir, { recursive: true });
+    }
+    await fs.promises.writeFile(configPath, JSON.stringify(configCache, null, 2), 'utf-8');
+  } catch (error) {
+    console.error('[Main] Failed to save config:', error);
+  }
+}
+
+ipcMain.handle('config:get', async (_, key: string) => {
+  await loadConfig();
+  return configCache[key];
+});
+
+ipcMain.handle('config:set', async (_, key: string, value: any) => {
+  await loadConfig();
+  configCache[key] = value;
+  await saveConfig();
+});
+
 // Keep a global reference of the window object
 let mainWindow: BrowserWindow | null = null;
 

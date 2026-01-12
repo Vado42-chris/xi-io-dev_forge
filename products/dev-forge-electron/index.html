@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dev Forge</title>
+  <style>
+    /* Xibalba Framework - Base Styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background-color: #050505; /* Xibalba Framework dark background */
+      color: #FFFFFF;
+      overflow: hidden;
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* Pattern #209: 5 Feet Back Test - Large, readable */
+    /* Pattern #210: Fewer Boxes - Minimal borders */
+    /* Pattern #211: Proportional Weight Balance */
+    /* Pattern #156: Universal Access */
+
+    #app {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Header */
+    .header {
+      height: 48px;
+      background-color: #1e1e1e;
+      border-bottom: 1px solid #2d2d2d;
+      display: flex;
+      align-items: center;
+      padding: 0 16px;
+      /* Pattern #209: Large, readable */
+      font-size: 14px;
+      font-weight: 400;
+    }
+
+    .header-title {
+      font-family: 'Antonio', sans-serif; /* font-tall-thin */
+      font-weight: 100;
+      font-size: 18px;
+      letter-spacing: 2px;
+      color: #FFFFFF;
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      display: flex;
+      overflow: hidden;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 256px;
+      background-color: #252526;
+      border-right: 1px solid #2d2d2d;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* Editor Area */
+    .editor-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background-color: #1e1e1e;
+    }
+
+    /* Status Bar */
+    .status-bar {
+      height: 24px;
+      background-color: #007acc;
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      font-size: 12px;
+      font-family: 'JetBrains Mono', monospace; /* font-tech */
+    }
+
+    /* Loading State */
+    .loading {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      font-size: 16px;
+      color: #CCCCCC;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="header">
+      <div class="header-title">DEV FORGE</div>
+    </div>
+    <div class="main-content">
+      <div class="sidebar">
+        <!-- Sidebar content will be added -->
+      </div>
+      <div class="editor-area">
+        <div class="loading">
+          Loading Dev Forge...
+        </div>
+      </div>
+    </div>
+    <div class="status-bar">
+      <span>Ready</span>
+    </div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>
+
