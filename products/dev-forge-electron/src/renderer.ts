@@ -87,20 +87,24 @@ function initializeUI(): void {
  */
 async function initializeEditor(): Promise<void> {
   try {
-    // Wait a bit for DOM to be fully ready
-    await new Promise(resolve => setTimeout(resolve, 100));
+    // Wait for Monaco to be loaded
+    while (typeof window.monaco === 'undefined') {
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
 
     // Initialize Monaco Editor
-    const editor = initializeMonacoEditor('monaco-editor-container');
+    const editor = await initializeMonacoEditor('monaco-editor-container');
     setEditor(editor);
 
     console.log('[Renderer] Monaco Editor initialized');
 
     // Add editor event listeners
-    editor.onDidChangeModelContent(() => {
-      // Handle content changes
-      updateStatus('Modified');
-    });
+    if (editor && typeof editor.onDidChangeModelContent === 'function') {
+      editor.onDidChangeModelContent(() => {
+        // Handle content changes
+        updateStatus('Modified');
+      });
+    }
 
   } catch (error) {
     console.error('[Renderer] Editor initialization error:', error);
@@ -117,4 +121,3 @@ function updateStatus(message: string): void {
     statusBar.textContent = message;
   }
 }
-
