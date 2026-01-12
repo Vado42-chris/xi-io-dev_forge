@@ -9,9 +9,17 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
+import { getDatabase } from './database/connection';
 
 // Load environment variables
 dotenv.config();
+
+// Initialize database connection
+const db = getDatabase();
+db.connect().catch(err => {
+  console.error('[Backend] Database connection error:', err);
+  process.exit(1);
+});
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -69,10 +77,24 @@ app.use((req, res) => {
   });
 });
 
+// Graceful shutdown
+process.on('SIGTERM', async () => {
+  console.log('[Backend] SIGTERM received, shutting down gracefully');
+  await db.close();
+  process.exit(0);
+});
+
+process.on('SIGINT', async () => {
+  console.log('[Backend] SIGINT received, shutting down gracefully');
+  await db.close();
+  process.exit(0);
+});
+
 // Start server
 app.listen(PORT, () => {
   console.log(`[Backend] Dev Forge Backend API running on port ${PORT}`);
   console.log(`[Backend] Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`[Backend] Database: ${db.getType()}`);
   console.log(`[Backend] Health check: http://localhost:${PORT}/health`);
 });
 
