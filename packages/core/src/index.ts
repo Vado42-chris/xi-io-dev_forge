@@ -7,7 +7,7 @@
  */
 
 // Types
-export * from './types';
+export * from './types/index';
 
 // Providers
 export * from './providers/modelProviderRegistry';
