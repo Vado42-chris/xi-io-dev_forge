@@ -87,7 +87,7 @@ function createWindow(): void {
     minWidth: 800,
     minHeight: 600,
     title: 'Dev Forge',
-    icon: path.join(__dirname, '../assets/icon.png'), // Will create later
+    // icon: path.join(__dirname, '../assets/icon.png'), // Will create later
     webPreferences: {
       nodeIntegration: false,
       contextIsolation: true,
@@ -99,13 +99,17 @@ function createWindow(): void {
   });
 
   // Load the application
-  if (process.env.NODE_ENV === 'development') {
-    // Development: Load from dev server or local HTML
-    mainWindow.loadFile(path.join(__dirname, '../index.html'));
-    mainWindow.webContents.openDevTools();
+  const htmlPath = path.join(__dirname, '../index.html');
+  if (fs.existsSync(htmlPath)) {
+    mainWindow.loadFile(htmlPath);
   } else {
-    // Production: Load from built files
-    mainWindow.loadFile(path.join(__dirname, '../index.html'));
+    // Fallback: Create basic HTML
+    mainWindow.loadURL('data:text/html;charset=utf-8,<html><body style="background:#050505;color:#fff;padding:20px;font-family:Inter,sans-serif"><h1>Dev Forge</h1><p>Loading...</p></body></html>');
+  }
+
+  // Open DevTools in development
+  if (process.env.NODE_ENV === 'development' || process.argv.includes('--dev')) {
+    mainWindow.webContents.openDevTools();
   }
 
   // Show window when ready to prevent visual flash

@@ -17,7 +17,6 @@
     "package:linux": "electron-builder --linux"
   },
   "dependencies": {
-    "@dev-forge/core": "*",
     "electron": "^28.0.0",
     "better-sqlite3": "^9.2.2",
     "monaco-editor": "^0.45.0"
