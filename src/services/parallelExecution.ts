@@ -336,24 +336,22 @@ export class ParallelExecutionService {
       };
 
       // Execute with streaming and timeout
+      // TODO: Implement streaming via provider system
+      // For now, use non-streaming generation and simulate chunks
       const streamPromise = new Promise<void>((resolve, reject) => {
         const timeoutId = setTimeout(() => {
           reject(new Error('Stream timeout'));
         }, timeout);
 
-        // TODO: Implement streaming via provider system
-        // For now, use non-streaming generation
-        modelManager.generate(model.id, request.prompt, request.options).then(response => {
-          onChunk?.(response);
-        }).catch(error => {
-          console.error(`[ParallelExecution] Stream error for ${model.id}:`, error);
-        });
-        // Placeholder - streaming will be implemented via provider system
-        const _streamPlaceholder = async (ollamaRequest: any, onChunk: any) => {
-          fullResponse += chunk;
-          onChunk(model.id, chunk);
-        })
-          .then(() => {
+        modelManager.generate(model.id, request.prompt, request.options)
+          .then((response) => {
+            // Simulate streaming by chunking the response
+            const chunkSize = 10;
+            for (let i = 0; i < response.length; i += chunkSize) {
+              const chunk = response.slice(i, i + chunkSize);
+              fullResponse += chunk;
+              onChunk(model.id, chunk);
+            }
             clearTimeout(timeoutId);
             resolve();
           })

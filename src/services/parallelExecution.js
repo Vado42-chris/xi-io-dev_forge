@@ -252,102 +252,99 @@ class ParallelExecutionService {
                 options: request.options,
             };
             // Execute with streaming and timeout
+            // TODO: Implement streaming via provider system
+            // For now, use non-streaming generation and simulate chunks
             const streamPromise = new Promise((resolve, reject) => {
                 const timeoutId = setTimeout(() => {
                     reject(new Error('Stream timeout'));
                 }, timeout);
-                // TODO: Implement streaming via provider system
-                // For now, use non-streaming generation
-                modelManager_1.modelManager.generate(model.id, request.prompt, request.options).then(response => {
-                    onChunk?.(response);
-                }).catch(error => {
-                    console.error(`[ParallelExecution] Stream error for ${model.id}:`, error);
+                modelManager_1.modelManager.generate(model.id, request.prompt, request.options)
+                    .then((response) => {
+                    // Simulate streaming by chunking the response
+                    const chunkSize = 10;
+                    for (let i = 0; i < response.length; i += chunkSize) {
+                        const chunk = response.slice(i, i + chunkSize);
+                        fullResponse += chunk;
+                        onChunk(model.id, chunk);
+                    }
+                    clearTimeout(timeoutId);
+                    resolve();
+                })
+                    .catch((error) => {
+                    clearTimeout(timeoutId);
+                    reject(error);
                 });
-                // Placeholder - streaming will be implemented via provider system
-                const _streamPlaceholder = async (ollamaRequest, onChunk) => {
-                    fullResponse += chunk;
-                    onChunk(model.id, chunk);
-                };
-            })
-                .then(() => {
-                clearTimeout(timeoutId);
-                resolve();
-            })
-                .catch((error) => {
-                clearTimeout(timeoutId);
-                reject(error);
+            });
+            await streamPromise;
+            const latency = Date.now() - startTime;
+            const result = {
+                modelId: model.id,
+                modelName: model.displayName,
+                response: fullResponse,
+                success: true,
+                latency,
+                timestamp: new Date(),
+            };
+            onComplete?.(result);
+            return result;
+        }
+        catch (error) {
+            const latency = Date.now() - startTime;
+            const result = {
+                modelId: model.id,
+                modelName: model.displayName,
+                response: fullResponse,
+                success: false,
+                error: error instanceof Error ? error.message : 'Unknown error',
+                latency,
+                timestamp: new Date(),
+            };
+            onComplete?.(result);
+            return result;
+        }
+    }
+    /**
+     * Validate request
+     */
+    validateRequest(request) {
+        if (!request) {
+            throw new Error('Request is required');
+        }
+        if (!request.prompt || typeof request.prompt !== 'string') {
+            throw new Error('Prompt is required and must be a string');
+        }
+        if (request.prompt.trim().length === 0) {
+            throw new Error('Prompt cannot be empty');
+        }
+        // Warn about very long prompts
+        if (request.prompt.length > 100000) {
+            console.warn('[ParallelExecution] Very long prompt detected. Consider chunking for better performance.');
+        }
+        // Validate timeout if provided
+        if (request.timeout !== undefined) {
+            if (typeof request.timeout !== 'number' || request.timeout < 0) {
+                throw new Error('Timeout must be a non-negative number');
+            }
+            if (request.timeout < 1000) {
+                console.warn('[ParallelExecution] Timeout is very short (< 1 second). This may cause premature timeouts.');
+            }
+        }
+        // Validate modelIds if provided
+        if (request.modelIds !== undefined) {
+            if (!Array.isArray(request.modelIds)) {
+                throw new Error('modelIds must be an array');
+            }
+            if (request.modelIds.length === 0) {
+                throw new Error('modelIds cannot be empty array. Omit to use all installed models.');
+            }
+            request.modelIds.forEach((id, index) => {
+                if (typeof id !== 'string' || id.trim().length === 0) {
+                    throw new Error(`modelIds[${index}] must be a non-empty string`);
+                }
             });
         }
-        finally { }
-        ;
-        await streamPromise;
-        const latency = Date.now() - startTime;
-        const result = {
-            modelId: model.id,
-            modelName: model.displayName,
-            response: fullResponse,
-            success: true,
-            latency,
-            timestamp: new Date(),
-        };
-        onComplete?.(result);
-        return result;
-    }
-    catch(error) {
-        const latency = Date.now() - startTime;
-        const result = {
-            modelId: model.id,
-            modelName: model.displayName,
-            response: fullResponse,
-            success: false,
-            error: error instanceof Error ? error.message : 'Unknown error',
-            latency,
-            timestamp: new Date(),
-        };
-        onComplete?.(result);
-        return result;
     }
 }
 exports.ParallelExecutionService = ParallelExecutionService;
-validateRequest(request, ParallelExecutionRequest);
-void {
-    if(, request) {
-        throw new Error('Request is required');
-    },
-    if(, request) { }, : .prompt || typeof request.prompt !== 'string'
-};
-{
-    throw new Error('Prompt is required and must be a string');
-}
-if (request.prompt.trim().length === 0) {
-    throw new Error('Prompt cannot be empty');
-}
-// Warn about very long prompts
-if (request.prompt.length > 100000) {
-    console.warn('[ParallelExecution] Very long prompt detected. Consider chunking for better performance.');
-}
-// Validate timeout if provided
-if (request.timeout !== undefined) {
-    if (typeof request.timeout !== 'number' || request.timeout < 0) {
-        throw new Error('Timeout must be a non-negative number');
-    }
-    if (request.timeout < 1000) {
-        console.warn('[ParallelExecution] Timeout is very short (< 1 second). This may cause premature timeouts.');
-    }
-}
-// Validate modelIds if provided
-if (request.modelIds !== undefined) {
-    if (!Array.isArray(request.modelIds)) {
-        throw new Error('modelIds must be an array');
-    }
-    if (request.modelIds.length === 0) {
-        throw new Error('modelIds cannot be empty array. Omit to use all installed models.');
-    }
-    request.modelIds.forEach((id, index) => {
-        if (typeof id !== 'string' || id.trim().length === 0) {
-            throw new Error(`modelIds[${index}] must be a non-empty string`);
-        }
-    });
-}
 exports.parallelExecutionService = new ParallelExecutionService();
 //# sourceMappingURL=parallelExecution.js.map
