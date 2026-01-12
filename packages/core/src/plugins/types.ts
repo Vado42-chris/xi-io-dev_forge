@@ -29,7 +29,7 @@ export interface PluginManifest {
   author?: string;
   license?: string;
   permissions: PluginPermissions;
-  entryPoint: string;
+  main: string; // Entry point file
   dependencies?: Record<string, string>;
 }
 

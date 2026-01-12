@@ -166,10 +166,7 @@ export class PluginManager {
     if (!manifest.id) errors.push('Missing id');
     if (!manifest.name) errors.push('Missing name');
     if (!manifest.version) errors.push('Missing version');
-    if (!manifest.apiVersion) errors.push('Missing apiVersion');
     if (!manifest.main) errors.push('Missing main');
-
-    // Note: API version validation removed - will be handled by adapters if needed
 
     // Validate plugin file exists
     const pluginPath = path.join(this.pluginDirectory, manifest.id);
@@ -179,7 +176,7 @@ export class PluginManager {
     }
 
     return {
-      isValid: errors.length === 0,
+      valid: errors.length === 0,
       errors,
       warnings
     };
