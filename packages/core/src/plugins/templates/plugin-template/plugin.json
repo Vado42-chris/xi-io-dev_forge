@@ -1,0 +1,30 @@
+{
+  "id": "my-plugin",
+  "name": "My Plugin",
+  "version": "1.0.0",
+  "apiVersion": "1.0.0",
+  "author": "Your Name",
+  "description": "Plugin description",
+  "license": "MIT",
+  "main": "index.js",
+  "permissions": {
+    "readFiles": ["**/*.ts", "**/*.js"],
+    "networkAccess": true,
+    "modelAccess": ["mistral-7b", "llama3.2-3b"]
+  },
+  "contributes": {
+    "commands": [
+      {
+        "command": "myPlugin.doSomething",
+        "title": "Do Something"
+      }
+    ],
+    "webviews": [
+      {
+        "id": "myPlugin.view",
+        "title": "My Plugin View"
+      }
+    ]
+  }
+}
+

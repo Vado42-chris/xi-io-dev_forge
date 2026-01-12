@@ -1,0 +1,48 @@
+{
+  "name": "@dev-forge/core",
+  "version": "1.0.0",
+  "description": "Core SDK for Dev Forge - Framework-agnostic extensibility system",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "module": "dist/index.esm.js",
+  "exports": {
+    ".": {
+      "import": "./dist/index.esm.js",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc && tsc --module esnext --outDir dist/esm",
+    "watch": "tsc --watch",
+    "test": "vitest",
+    "lint": "eslint src --ext ts"
+  },
+  "keywords": [
+    "dev-forge",
+    "sdk",
+    "ai",
+    "models",
+    "plugins",
+    "extensibility"
+  ],
+  "author": "Xibalba Mixed Media Studio",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.13.2",
+    "minimatch": "^5.1.6",
+    "node-llama-cpp": "^2.8.16"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.1.0"
+  },
+  "peerDependencies": {},
+  "peerDependenciesMeta": {}
+}
+
