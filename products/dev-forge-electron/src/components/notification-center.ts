@@ -147,7 +147,7 @@ export class NotificationCenter {
   /**
    * Get notification icon
    */
-  private getNotificationIcon(type: NotificationType): string {
+  private getNotificationIcon(type: 'info' | 'success' | 'warning' | 'error'): string {
     switch (type) {
       case 'info':
         return 'ℹ️';

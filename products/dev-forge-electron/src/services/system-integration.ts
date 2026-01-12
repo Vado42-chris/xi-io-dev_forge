@@ -83,7 +83,7 @@ export class SystemIntegration {
       this.logger.info('Settings Manager ready.');
 
       // 2. Initialize Theme Manager and apply theme
-      const themeId = this.settingsManager.get<string>('ui.theme', 'xibalba-dark');
+      const themeId = (this.settingsManager.get('ui', 'theme') as string) || 'xibalba-dark';
       themeManager.setTheme(themeId);
       this.statusManager.info('Theme Manager ready.');
       this.logger.info('Theme Manager ready.');
@@ -162,7 +162,7 @@ export class SystemIntegration {
   private setupEventListeners(): void {
     // Theme change events
     themeManager.onThemeChange((theme) => {
-      this.settingsManager.set('ui.theme', theme.id);
+      this.settingsManager.set('ui', 'theme', theme.id);
       this.notificationService.info('Theme Changed', `Switched to ${theme.displayName}`);
       this.logger.info(`Theme changed to ${theme.displayName}`);
     });

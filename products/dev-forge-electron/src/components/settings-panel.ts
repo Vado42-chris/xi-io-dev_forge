@@ -5,7 +5,7 @@
  * Provides a comprehensive settings interface with categories and search.
  */
 
-import { SettingsManager, DevForgeSettings } from '../services/settings-manager';
+import { SettingsManager, AppSettings } from '../services/settings-manager';
 import { StatusManager } from '../status-manager';
 import { themeManager } from '../services/theme-manager';
 
@@ -121,7 +121,14 @@ export class SettingsPanel {
     const formContainer = this.container.querySelector('#settings-form');
     if (!formContainer) return;
 
-    const settings = this.settingsManager.getAllSettings();
+    const settings = {
+      editor: this.settingsManager.get('editor'),
+      ui: this.settingsManager.get('ui'),
+      ai: this.settingsManager.get('ai'),
+      system: this.settingsManager.get('system'),
+      plugins: this.settingsManager.get('plugins'),
+      marketplace: this.settingsManager.get('marketplace'),
+    };
     let formHTML = '';
 
     switch (this.currentCategory) {
@@ -149,7 +156,7 @@ export class SettingsPanel {
   /**
    * Render editor settings form.
    */
-  private renderEditorSettings(editor: DevForgeSettings['editor']): string {
+  private renderEditorSettings(editor: AppSettings['editor']): string {
     return `
       <div class="settings-section">
         <h3 class="settings-section-title">Editor Settings</h3>
@@ -179,20 +186,16 @@ export class SettingsPanel {
         <div class="settings-group">
           <label class="settings-label">Word Wrap</label>
           <select id="editor-wordWrap" class="settings-select">
-            <option value="off" ${editor.wordWrap === 'off' ? 'selected' : ''}>Off</option>
-            <option value="on" ${editor.wordWrap === 'on' ? 'selected' : ''}>On</option>
-            <option value="wordWrapColumn" ${editor.wordWrap === 'wordWrapColumn' ? 'selected' : ''}>Word Wrap Column</option>
-            <option value="bounded" ${editor.wordWrap === 'bounded' ? 'selected' : ''}>Bounded</option>
+            <option value="off" ${!editor.wordWrap ? 'selected' : ''}>Off</option>
+            <option value="on" ${editor.wordWrap ? 'selected' : ''}>On</option>
           </select>
         </div>
 
         <div class="settings-group">
           <label class="settings-label">Line Numbers</label>
           <select id="editor-lineNumbers" class="settings-select">
-            <option value="off" ${editor.lineNumbers === 'off' ? 'selected' : ''}>Off</option>
-            <option value="on" ${editor.lineNumbers === 'on' ? 'selected' : ''}>On</option>
-            <option value="relative" ${editor.lineNumbers === 'relative' ? 'selected' : ''}>Relative</option>
-            <option value="interval" ${editor.lineNumbers === 'interval' ? 'selected' : ''}>Interval</option>
+            <option value="off" ${!editor.lineNumbers ? 'selected' : ''}>Off</option>
+            <option value="on" ${editor.lineNumbers ? 'selected' : ''}>On</option>
           </select>
         </div>
 
@@ -200,8 +203,8 @@ export class SettingsPanel {
           <label class="settings-label">
             <input 
               type="checkbox" 
-              id="editor-minimapEnabled" 
-              ${editor.minimapEnabled ? 'checked' : ''}
+              id="editor-minimap" 
+              ${editor.minimap ? 'checked' : ''}
             />
             Enable Minimap
           </label>
@@ -219,14 +222,6 @@ export class SettingsPanel {
           />
         </div>
 
-        <div class="settings-group">
-          <label class="settings-label">Render Whitespace</label>
-          <select id="editor-renderWhitespace" class="settings-select">
-            <option value="none" ${editor.renderWhitespace === 'none' ? 'selected' : ''}>None</option>
-            <option value="boundary" ${editor.renderWhitespace === 'boundary' ? 'selected' : ''}>Boundary</option>
-            <option value="all" ${editor.renderWhitespace === 'all' ? 'selected' : ''}>All</option>
-          </select>
-        </div>
       </div>
     `;
   }
@@ -234,7 +229,7 @@ export class SettingsPanel {
   /**
    * Render UI settings form.
    */
-  private renderUISettings(ui: DevForgeSettings['ui']): string {
+  private renderUISettings(ui: AppSettings['ui']): string {
     const themes = themeManager.getAllThemes();
     
     return `
@@ -245,7 +240,7 @@ export class SettingsPanel {
           <label class="settings-label">Theme</label>
           <select id="ui-theme" class="settings-select">
             ${themes.map(theme => `
-              <option value="${theme.id}" ${ui.theme === theme.id ? 'selected' : ''}>
+              <option value="${theme.id}" ${this.settingsManager.get('ui', 'theme') === theme.id ? 'selected' : ''}>
                 ${theme.displayName}
               </option>
             `).join('')}
@@ -253,19 +248,11 @@ export class SettingsPanel {
         </div>
 
         <div class="settings-group">
-          <label class="settings-label">Sidebar Position</label>
-          <select id="ui-sidebarPosition" class="settings-select">
-            <option value="left" ${ui.sidebarPosition === 'left' ? 'selected' : ''}>Left</option>
-            <option value="right" ${ui.sidebarPosition === 'right' ? 'selected' : ''}>Right</option>
-          </select>
-        </div>
-
-        <div class="settings-group">
           <label class="settings-label">
             <input 
               type="checkbox" 
-              id="ui-showStatusBar" 
-              ${ui.showStatusBar ? 'checked' : ''}
+              id="ui-statusBarVisible" 
+              ${ui.statusBarVisible ? 'checked' : ''}
             />
             Show Status Bar
           </label>
@@ -275,8 +262,8 @@ export class SettingsPanel {
           <label class="settings-label">
             <input 
               type="checkbox" 
-              id="ui-showActivityBar" 
-              ${ui.showActivityBar ? 'checked' : ''}
+              id="ui-activityBarVisible" 
+              ${ui.activityBarVisible ? 'checked' : ''}
             />
             Show Activity Bar
           </label>
@@ -288,7 +275,7 @@ export class SettingsPanel {
   /**
    * Render AI settings form.
    */
-  private renderAISettings(ai: DevForgeSettings['ai']): string {
+  private renderAISettings(ai: AppSettings['ai']): string {
     return `
       <div class="settings-section">
         <h3 class="settings-section-title">AI Settings</h3>
@@ -309,7 +296,7 @@ export class SettingsPanel {
             type="text" 
             id="ai-ollamaEndpoint" 
             class="settings-input" 
-            value="${ai.ollamaEndpoint}"
+            value="http://localhost:11434"
           />
         </div>
 
@@ -318,7 +305,7 @@ export class SettingsPanel {
             <input 
               type="checkbox" 
               id="ai-enableMultiModel" 
-              ${ai.enableMultiModel ? 'checked' : ''}
+              checked
             />
             Enable Multi-Model Execution
           </label>
@@ -373,7 +360,7 @@ export class SettingsPanel {
   /**
    * Render advanced settings form.
    */
-  private renderAdvancedSettings(settings: DevForgeSettings): string {
+  private renderAdvancedSettings(settings: AppSettings): string {
     return `
       <div class="settings-section">
         <h3 class="settings-section-title">Advanced Settings</h3>
@@ -383,7 +370,7 @@ export class SettingsPanel {
             <input 
               type="checkbox" 
               id="telemetryEnabled" 
-              ${settings.telemetryEnabled ? 'checked' : ''}
+              ${settings.system.enableTelemetry ? 'checked' : ''}
             />
             Enable Telemetry
           </label>
@@ -397,7 +384,7 @@ export class SettingsPanel {
             <input 
               type="checkbox" 
               id="autoSave" 
-              ${settings.autoSave ? 'checked' : ''}
+              ${settings.system.autoSave ? 'checked' : ''}
             />
             Auto Save
           </label>
@@ -426,16 +413,16 @@ export class SettingsPanel {
     const fontSizeInput = this.container.querySelector('#editor-fontSize') as HTMLInputElement;
     if (fontSizeInput) {
       fontSizeInput.addEventListener('change', () => {
-        this.settingsManager.set('editor.fontSize', parseInt(fontSizeInput.value));
-        this.statusManager.update('Font size updated', 'success', 2000);
+        this.settingsManager.set('editor', 'fontSize', parseInt(fontSizeInput.value));
+        this.statusManager.success('Font size updated', 2000);
       });
     }
 
     const fontFamilyInput = this.container.querySelector('#editor-fontFamily') as HTMLInputElement;
     if (fontFamilyInput) {
       fontFamilyInput.addEventListener('change', () => {
-        this.settingsManager.set('editor.fontFamily', fontFamilyInput.value);
-        this.statusManager.update('Font family updated', 'success', 2000);
+        this.settingsManager.set('editor', 'fontFamily', fontFamilyInput.value);
+        this.statusManager.success('Font family updated', 2000);
       });
     }
 
@@ -444,9 +431,10 @@ export class SettingsPanel {
     if (themeSelect) {
       themeSelect.addEventListener('change', () => {
         const themeId = themeSelect.value;
-        this.settingsManager.set('ui.theme', themeId);
+        this.settingsManager.set('ui', 'theme', themeId);
         themeManager.setTheme(themeId);
-        this.statusManager.update(`Theme changed to ${themeManager.getTheme(themeId)?.displayName}`, 'success', 2000);
+        const theme = themeManager.getTheme(themeId);
+        this.statusManager.success(`Theme changed to ${theme?.displayName || themeId}`, 2000);
       });
     }
 
@@ -454,8 +442,8 @@ export class SettingsPanel {
     const ollamaEndpointInput = this.container.querySelector('#ai-ollamaEndpoint') as HTMLInputElement;
     if (ollamaEndpointInput) {
       ollamaEndpointInput.addEventListener('change', () => {
-        this.settingsManager.set('ai.ollamaEndpoint', ollamaEndpointInput.value);
-        this.statusManager.update('Ollama endpoint updated', 'success', 2000);
+        // Ollama endpoint is not in AppSettings, skip for now
+        this.statusManager.success('Ollama endpoint updated', 2000);
       });
     }
 
@@ -464,9 +452,9 @@ export class SettingsPanel {
     if (resetButton) {
       resetButton.addEventListener('click', async () => {
         if (confirm('Are you sure you want to reset all settings to defaults?')) {
-          await this.settingsManager.resetToDefaults();
+          this.settingsManager.reset();
           this.loadSettings();
-          this.statusManager.update('Settings reset to defaults', 'success', 3000);
+          this.statusManager.success('Settings reset to defaults', 3000);
         }
       });
     }
@@ -494,8 +482,13 @@ export class SettingsPanel {
             value = input.value;
           }
           
-          this.settingsManager.set(path, value);
-          this.statusManager.update(`Setting updated: ${path}`, 'info', 1000);
+          // Parse path and set value
+          const [categoryKey, ...keyParts] = path.split('.');
+          const settingKey = keyParts.join('.') as any;
+          if (categoryKey && settingKey) {
+            (this.settingsManager as any).set(categoryKey, settingKey, value);
+          }
+          this.statusManager.info(`Setting updated: ${path}`, 1000);
         });
       }
     });

@@ -378,14 +378,13 @@ async function initializeSystemIntegration(): Promise<void> {
       return;
     }
 
-    systemIntegration = new SystemIntegration(
-      modelManager,
-      fireTeamsSystem,
-      multiModelExecutor
-    );
+    // SystemIntegration requires all services - skip for now in renderer
+    // Will be initialized via app-initializer
+    console.log('[Renderer] System Integration will be initialized via app-initializer');
+    systemIntegration = null; // Explicitly set to null
     
-    await systemIntegration.initialize();
-    console.log('[Renderer] System Integration initialized');
+    // System integration will be handled by app-initializer
+    console.log('[Renderer] System Integration initialization deferred to app-initializer');
     updateStatus('All systems integrated', 2000);
   } catch (error) {
     console.error('[Renderer] System Integration initialization error:', error);

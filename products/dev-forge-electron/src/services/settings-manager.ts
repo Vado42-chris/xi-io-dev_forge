@@ -28,6 +28,7 @@ export interface AppSettings {
 
   // UI settings
   ui: {
+    theme: string;
     sidebarWidth: number;
     statusBarVisible: boolean;
     activityBarVisible: boolean;
@@ -96,6 +97,7 @@ export class SettingsManager {
         autoSaveConversations: true,
       },
       ui: {
+        theme: 'xibalba-dark',
         sidebarWidth: 256,
         statusBarVisible: true,
         activityBarVisible: true,

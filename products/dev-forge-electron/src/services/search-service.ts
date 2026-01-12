@@ -16,12 +16,18 @@ export interface SearchQuery {
 }
 
 export interface SearchResult {
-  file: string;
-  line: number;
-  column: number;
-  match: string;
-  context: string;
+  id: string;
+  type: 'file' | 'directory' | 'content';
+  name: string;
+  path: string;
+  file?: string;
+  line?: number;
+  column?: number;
+  match?: string;
+  context?: string;
+  excerpt?: string;
   score: number;
+  tags?: string[];
 }
 
 export interface SearchOptions {
@@ -56,13 +62,19 @@ export class SearchService {
 
       for (const match of matches) {
         const context = this.getContext(lines, lineIndex, options.contextLines || 2);
+        const resultId = `search-result-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
         
         results.push({
+          id: resultId,
+          type: 'content',
+          name: '', // Will be set by caller
+          path: '', // Will be set by caller
           file: '', // Will be set by caller
           line: lineIndex + 1,
           column: match.index + 1,
           match: match.text,
           context,
+          excerpt: context,
           score: this.calculateScore(match.text, query.text),
         });
 
@@ -161,8 +173,12 @@ export class SearchService {
       }
 
       const results = await this.searchInText(file.content, query, options);
+      const fileName = file.path.split('/').pop() || file.path;
       results.forEach(result => {
         result.file = file.path;
+        result.path = file.path;
+        result.name = fileName;
+        result.type = 'file';
       });
 
       allResults.push(...results);

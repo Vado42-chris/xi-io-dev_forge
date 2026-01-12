@@ -58,11 +58,11 @@ export class AppInitializer {
   constructor() {
     // Initialize core services first
     this.statusManager = new StatusManager();
-    this.logger = new Logger('info');
+    this.logger = new Logger({ level: 'info' });
     this.modelManager = new ModelManager();
     this.fireTeamsSystem = new FireTeamsSystem();
     this.multiModelExecutor = new MultiModelExecutor(this.modelManager);
-    this.imageGenerationService = new ImageGenerationService(this.modelManager, this.statusManager);
+    this.imageGenerationService = new ImageGenerationService();
     this.settingsManager = new SettingsManager();
     this.commandPalette = new CommandPalette();
     this.workspaceManager = new WorkspaceManager();
@@ -96,7 +96,7 @@ export class AppInitializer {
 
     try {
       this.logger.info('Initializing Dev Forge...');
-      this.statusManager.update('Initializing Dev Forge...', 'info');
+      this.statusManager.info('Initializing Dev Forge...');
 
       // 1. Initialize all systems
       await this.systemIntegration!.initialize();
@@ -111,7 +111,7 @@ export class AppInitializer {
       this.logger.info('Global event handlers set up');
 
       // 4. Apply initial theme
-      const themeId = this.settingsManager.get<string>('ui.theme', 'xibalba-dark');
+      const themeId = this.settingsManager.get('ui', 'theme') || 'xibalba-dark';
       themeManager.setTheme(themeId);
       this.logger.info(`Theme applied: ${themeId}`);
 
@@ -120,15 +120,15 @@ export class AppInitializer {
       this.logger.info('Shortcut manager initialized');
 
       this.isInitialized = true;
-      this.statusManager.update('Dev Forge ready!', 'success', 3000);
+      this.statusManager.success('Dev Forge ready!', 3000);
       this.logger.info('Dev Forge initialization complete');
-      this.notificationService.send('Welcome', 'Dev Forge is ready to use!', 'success');
+      this.notificationService.success('Welcome', 'Dev Forge is ready to use!');
 
       console.log('[AppInitializer] Dev Forge initialized successfully');
     } catch (error: any) {
       console.error('[AppInitializer] Initialization error:', error);
       this.logger.error(`Initialization failed: ${error.message}`, error);
-      this.statusManager.update(`Initialization failed: ${error.message}`, 'error');
+      this.statusManager.error(`Initialization failed: ${error.message}`);
       throw error;
     }
   }
@@ -150,8 +150,7 @@ export class AppInitializer {
       if (marketplaceContainer) {
         this.marketplacePanel = new MarketplacePanel(
           'marketplace-panel',
-          marketplaceSystem,
-          this.statusManager
+          marketplaceSystem
         );
         this.logger.info('Marketplace Panel initialized');
       }
@@ -251,15 +250,16 @@ export class AppInitializer {
       const currentTheme = themeManager.getCurrentTheme();
       const newThemeId = currentTheme.isDark ? 'xibalba-light' : 'xibalba-dark';
       themeManager.setTheme(newThemeId);
-      this.settingsManager.set('ui.theme', newThemeId);
-      this.notificationService.send('Theme Changed', `Switched to ${themeManager.getTheme(newThemeId)?.displayName}`, 'info');
+      this.settingsManager.set('ui', 'theme', newThemeId);
+      const theme = themeManager.getTheme(newThemeId);
+      this.notificationService.info('Theme Changed', `Switched to ${theme?.displayName || newThemeId}`);
     });
 
     // File opening
     document.addEventListener('devforge:open-file', (e: any) => {
       const { path, line } = e.detail;
       this.logger.info(`Opening file: ${path}${line ? ` at line ${line}` : ''}`);
-      this.statusManager.update(`Opening ${path}...`, 'info', 2000);
+      this.statusManager.info(`Opening ${path}...`, 2000);
       // This would trigger the editor to open the file
     });
 
@@ -267,14 +267,14 @@ export class AppInitializer {
     document.addEventListener('devforge:workspace-loaded', (e: any) => {
       const { workspaceId } = e.detail;
       this.logger.info(`Workspace loaded: ${workspaceId}`);
-      this.notificationService.send('Workspace Loaded', 'Workspace has been loaded successfully', 'success');
+      this.notificationService.success('Workspace Loaded', 'Workspace has been loaded successfully');
     });
 
     // Project opened
     document.addEventListener('devforge:project-opened', (e: any) => {
       const { project } = e.detail;
       this.logger.info(`Project opened: ${project.name}`);
-      this.notificationService.send('Project Opened', `Opening project: ${project.name}`, 'info');
+      this.notificationService.info('Project Opened', `Opening project: ${project.name}`);
     });
 
     this.logger.info('Global event handlers set up');

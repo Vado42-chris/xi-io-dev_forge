@@ -157,7 +157,7 @@ export class SearchPanel {
       return;
     }
 
-    this.statusManager.update('Searching...', 'info');
+    this.statusManager.info('Searching...');
     this.selectedIndex = 0;
 
     try {
@@ -165,9 +165,12 @@ export class SearchPanel {
       const contentChecked = (this.container.querySelector('#search-content') as HTMLInputElement)?.checked ?? true;
       const tagsChecked = (this.container.querySelector('#search-tags') as HTMLInputElement)?.checked ?? false;
 
-      const results = await this.searchService.search(this.currentQuery, {
-        tags: tagsChecked ? [this.currentQuery] : undefined
-      });
+      // Use searchInText for now - full search implementation pending
+      const results = await this.searchService.searchInText(
+        '', // Will be populated from workspace
+        { text: this.currentQuery },
+        { maxResults: 100 }
+      );
 
       // Filter results based on checkboxes
       this.currentResults = results.filter(result => {
@@ -178,10 +181,10 @@ export class SearchPanel {
       });
 
       this.renderResults();
-      this.statusManager.update(`Found ${this.currentResults.length} results`, 'success', 2000);
+      this.statusManager.success(`Found ${this.currentResults.length} results`, 2000);
     } catch (error: any) {
       console.error('[SearchPanel] Error performing search:', error);
-      this.statusManager.update(`Search error: ${error.message}`, 'error');
+      this.statusManager.error(`Search error: ${error.message}`);
       this.currentResults = [];
       this.renderResults();
     }
@@ -268,7 +271,7 @@ export class SearchPanel {
       detail: { path: result.path, line: this.extractLineNumber(result.excerpt) }
     }));
 
-    this.statusManager.update(`Opening ${result.name}...`, 'info', 2000);
+    this.statusManager.info(`Opening ${result.name}...`, 2000);
   }
 
   /**

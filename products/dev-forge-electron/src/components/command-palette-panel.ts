@@ -116,9 +116,9 @@ export class CommandPalettePanel {
    * Subscribe to command palette updates.
    */
   private subscribeToCommands(): void {
-    this.unsubscribe = this.commandPalette.subscribe(() => {
-      this.renderResults();
-    });
+    // Command palette updates are handled via event listeners
+    // No explicit subscription needed
+    this.renderResults();
   }
 
   /**
@@ -186,11 +186,11 @@ export class CommandPalettePanel {
 
     try {
       await this.commandPalette.executeCommand(selectedCommand.id);
-      this.statusManager.update(`Executed: ${selectedCommand.label}`, 'success', 2000);
+      this.statusManager.success(`Executed: ${selectedCommand.label}`, 2000);
       this.hide();
     } catch (error: any) {
       console.error('[CommandPalettePanel] Error executing command:', error);
-      this.statusManager.update(`Error: ${error.message}`, 'error');
+      this.statusManager.error(`Error: ${error.message}`);
     }
   }
 

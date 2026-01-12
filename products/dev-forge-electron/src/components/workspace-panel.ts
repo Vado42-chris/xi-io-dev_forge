@@ -100,7 +100,7 @@ export class WorkspacePanel {
     if (!listContainer || !emptyState) return;
 
     const workspaces = this.workspaceManager.getAllWorkspaces();
-    const activeWorkspace = this.workspaceManager.getActiveWorkspace();
+    const activeWorkspace = (this.workspaceManager as any).currentWorkspace || null;
 
     if (workspaces.length === 0) {
       listContainer.innerHTML = '';
@@ -111,6 +111,7 @@ export class WorkspacePanel {
     emptyState.classList.add('hidden');
     listContainer.innerHTML = workspaces.map(workspace => {
       const isActive = activeWorkspace?.id === workspace.id;
+      const workspaceProjects = (this.workspaceManager as any).getProjectsByWorkspace?.(workspace.id) || [];
       return `
         <div class="workspace-card ${isActive ? 'active' : ''}" data-workspace-id="${workspace.id}">
           <div class="workspace-card-header">
@@ -128,13 +129,13 @@ export class WorkspacePanel {
             <div class="workspace-path">${workspace.path}</div>
             <div class="workspace-projects">
               <div class="workspace-projects-header">
-                <span class="workspace-projects-title">Projects (${workspace.projects.length})</span>
+                <span class="workspace-projects-title">Projects (${workspaceProjects.length})</span>
                 <button class="icon-button workspace-add-project-button" title="Add Project">+</button>
               </div>
               <div class="workspace-projects-list">
-                ${workspace.projects.length === 0 
+                ${workspaceProjects.length === 0 
                   ? '<div class="workspace-no-projects">No projects yet</div>'
-                  : workspace.projects.map(project => `
+                  : workspaceProjects.map((project: any) => `
                     <div class="workspace-project-item" data-project-id="${project.id}">
                       <span class="workspace-project-icon">📄</span>
                       <span class="workspace-project-name">${project.name}</span>
@@ -146,7 +147,7 @@ export class WorkspacePanel {
             </div>
             <div class="workspace-meta">
               <span class="workspace-meta-item">Created: ${new Date(workspace.createdAt).toLocaleDateString()}</span>
-              <span class="workspace-meta-item">Last opened: ${new Date(workspace.lastOpened).toLocaleDateString()}</span>
+              ${workspace.lastOpened ? `<span class="workspace-meta-item">Last opened: ${new Date(workspace.lastOpened).toLocaleDateString()}</span>` : ''}
             </div>
           </div>
         </div>
@@ -165,12 +166,12 @@ export class WorkspacePanel {
     if (!path) return;
 
     try {
-      await this.workspaceManager.createWorkspace(name, path);
-      this.statusManager.update(`Workspace "${name}" created successfully`, 'success', 3000);
+      this.workspaceManager.createWorkspace({ name, path, settings: { excludePatterns: [], includePatterns: [], searchExclude: [], watcherExclude: [], filesAssociations: {} } });
+      this.statusManager.success(`Workspace "${name}" created successfully`, 3000);
       this.loadWorkspaces();
     } catch (error: any) {
       console.error('[WorkspacePanel] Error creating workspace:', error);
-      this.statusManager.update(`Error creating workspace: ${error.message}`, 'error');
+      this.statusManager.error(`Error creating workspace: ${error.message}`);
     }
   }
 
@@ -179,8 +180,8 @@ export class WorkspacePanel {
    */
   private async loadWorkspace(workspaceId: string): Promise<void> {
     try {
-      await this.workspaceManager.loadWorkspace(workspaceId);
-      this.statusManager.update('Workspace loaded successfully', 'success', 3000);
+      this.workspaceManager.openWorkspace(workspaceId);
+      this.statusManager.success('Workspace loaded successfully', 3000);
       this.loadWorkspaces();
       
       // Dispatch event for other components
@@ -189,7 +190,7 @@ export class WorkspacePanel {
       }));
     } catch (error: any) {
       console.error('[WorkspacePanel] Error loading workspace:', error);
-      this.statusManager.update(`Error loading workspace: ${error.message}`, 'error');
+      this.statusManager.error(`Error loading workspace: ${error.message}`);
     }
   }
 
@@ -207,12 +208,12 @@ export class WorkspacePanel {
     try {
       // Note: WorkspaceManager doesn't have a delete method yet, so we'll need to add it
       // For now, we'll just show a message
-      this.statusManager.update('Workspace deletion not yet implemented', 'warn', 3000);
+      this.statusManager.info('Workspace deletion not yet implemented', 3000);
       // await this.workspaceManager.deleteWorkspace(workspaceId);
       // this.loadWorkspaces();
     } catch (error: any) {
       console.error('[WorkspacePanel] Error deleting workspace:', error);
-      this.statusManager.update(`Error deleting workspace: ${error.message}`, 'error');
+      this.statusManager.error(`Error deleting workspace: ${error.message}`);
     }
   }
 
@@ -229,12 +230,23 @@ export class WorkspacePanel {
     const type = prompt('Enter project type (code/design/data/mixed):') as Project['type'] || 'code';
 
     try {
-      await this.workspaceManager.addProjectToActiveWorkspace(name, path, type);
-      this.statusManager.update(`Project "${name}" added successfully`, 'success', 3000);
+      const currentWorkspace = this.workspaceManager.getCurrentWorkspace();
+      if (!currentWorkspace) {
+        this.statusManager.error('No active workspace');
+        return;
+      }
+      this.workspaceManager.addProject({ 
+        workspaceId, 
+        name, 
+        path, 
+        type: (type as 'folder' | 'file' | 'workspace') || 'folder',
+        tags: []
+      });
+      this.statusManager.success(`Project "${name}" added successfully`, 3000);
       this.loadWorkspaces();
     } catch (error: any) {
       console.error('[WorkspacePanel] Error adding project:', error);
-      this.statusManager.update(`Error adding project: ${error.message}`, 'error');
+      this.statusManager.error(`Error adding project: ${error.message}`);
     }
   }
 
@@ -245,7 +257,8 @@ export class WorkspacePanel {
     const workspace = this.workspaceManager.getAllWorkspaces().find(w => w.id === workspaceId);
     if (!workspace) return;
 
-    const project = workspace.projects.find(p => p.id === projectId);
+    const workspaceProjects = this.workspaceManager.getWorkspaceProjects(workspaceId);
+    const project = workspaceProjects.find((p: any) => p.id === projectId);
     if (!project) return;
 
     try {
@@ -253,10 +266,10 @@ export class WorkspacePanel {
       document.dispatchEvent(new CustomEvent('devforge:project-opened', {
         detail: { workspaceId, projectId, project }
       }));
-      this.statusManager.update(`Opening project "${project.name}"...`, 'info', 2000);
+      this.statusManager.info(`Opening project "${project.name}"...`, 2000);
     } catch (error: any) {
       console.error('[WorkspacePanel] Error opening project:', error);
-      this.statusManager.update(`Error opening project: ${error.message}`, 'error');
+      this.statusManager.error(`Error opening project: ${error.message}`);
     }
   }
 
