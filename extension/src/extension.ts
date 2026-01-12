@@ -42,7 +42,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   const config = vscode.workspace.getConfiguration('devForge');
 
   // Initialize API key manager
-  apiKeyManager = new ApiKeyManager(context.secrets);
+  apiKeyManager = new ApiKeyManager(context);
 
   // Initialize provider registries
   modelProviderRegistry = new ModelProviderRegistry();
@@ -99,24 +99,24 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 /**
  * Initialize model and API providers based on settings
  */
-async function initializeProviders(): Promise<void> {
-  if (!configManager || !modelProviderRegistry || !apiProviderRegistry) {
+async function initializeProviders(config: vscode.WorkspaceConfiguration): Promise<void> {
+  if (!modelProviderRegistry || !apiProviderRegistry) {
     return;
   }
 
   // Initialize Ollama provider if enabled
-  const ollamaEnabled = configManager.getSetting<boolean>('models.ollama.enabled', true);
+  const ollamaEnabled = config.get<boolean>('models.ollama.enabled', true);
   if (ollamaEnabled) {
-    const ollamaBaseUrl = configManager.getSetting<string>('models.ollama.baseUrl', 'http://localhost:11434');
+    const ollamaBaseUrl = config.get<string>('models.ollama.baseUrl', 'http://localhost:11434');
     const ollamaProvider = new OllamaProvider({ baseUrl: ollamaBaseUrl });
     await modelProviderRegistry.registerProvider(ollamaProvider);
   }
 
   // Initialize GGUF provider if enabled
-  const ggufEnabled = configManager.getSetting<boolean>('models.gguf.enabled', false);
+  const ggufEnabled = config.get<boolean>('models.gguf.enabled', false);
   if (ggufEnabled) {
-    const ggufDirectory = configManager.getSetting<string>('models.gguf.modelsDirectory', '~/.dev-forge/models/gguf');
-    const maxMemory = configManager.getSetting<number>('models.gguf.maxMemory', 4096);
+    const ggufDirectory = config.get<string>('models.gguf.modelsDirectory', '~/.dev-forge/models/gguf');
+    const maxMemory = config.get<number>('models.gguf.maxMemory', 4096);
     const ggufProvider = new GGUFProvider({
       modelsDirectory: ggufDirectory.replace(/^~/, process.env.HOME || ''),
       maxMemory
@@ -160,8 +160,6 @@ async function updateStatusBar(): Promise<void> {
  * Extension deactivation
  */
 export async function deactivate(): Promise<void> {
-  configManager?.dispose();
-  configManager = undefined;
   statusBarManager?.dispose();
   statusBarManager = undefined;
   // ModelProviderRegistry doesn't have dispose, but providers do

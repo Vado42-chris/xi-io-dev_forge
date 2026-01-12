@@ -23,9 +23,6 @@ export interface ConfigStorage {
   get<T>(key: string, defaultValue?: T): T | undefined;
 }
 
-// Export interfaces for adapters
-export type { SecretStorage, ConfigStorage };
-
 export class ApiKeyManager {
   private secretStorage?: SecretStorage;
   private config?: ConfigStorage;

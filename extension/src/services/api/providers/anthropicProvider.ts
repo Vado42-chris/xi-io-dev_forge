@@ -5,7 +5,8 @@
  */
 
 import { BaseApiProvider } from './baseApiProvider';
-import { ApiProviderConfig, GenerateOptions } from '../types';
+import { ApiProviderConfig } from '../types';
+import type { GenerateOptions } from '../../types';
 
 export class AnthropicProvider extends BaseApiProvider {
   constructor(config: ApiProviderConfig) {
@@ -31,12 +32,24 @@ export class AnthropicProvider extends BaseApiProvider {
       temperature: options?.temperature
     };
 
-    const response = await this.client.post(endpoint, requestBody, {
-      headers: {
-        ...this.client.defaults.headers,
-        'anthropic-version': '2023-06-01'
+    const headers: Record<string, string> = {
+      'anthropic-version': '2023-06-01'
+    };
+    
+    // Copy default headers
+    if (this.client.defaults.headers) {
+      const defaultHeaders = this.client.defaults.headers as any;
+      if (defaultHeaders.common) {
+        Object.assign(headers, defaultHeaders.common);
       }
-    });
+      Object.keys(defaultHeaders).forEach(key => {
+        if (key !== 'common' && typeof defaultHeaders[key] === 'string') {
+          headers[key] = defaultHeaders[key];
+        }
+      });
+    }
+
+    const response = await this.client.post(endpoint, requestBody, { headers });
     
     return response.data.content[0].text;
   }
@@ -60,9 +73,10 @@ export class AnthropicProvider extends BaseApiProvider {
     const response = await this.client.post(endpoint, requestBody, {
       responseType: 'stream',
       headers: {
-        ...this.client.defaults.headers,
-        'anthropic-version': '2023-06-01'
-      }
+        'anthropic-version': '2023-06-01',
+        ...(this.client.defaults.headers.common || {}),
+        ...(this.client.defaults.headers as Record<string, string>)
+      } as Record<string, string>
     });
 
     // Parse SSE stream
