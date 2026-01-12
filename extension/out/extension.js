@@ -49,14 +49,13 @@ const apiProviderManager_1 = require("./ui/apiProviderManager");
 const pluginManager_1 = require("./ui/pluginManager");
 const treeViews_1 = require("./ui/treeViews");
 const statusBar_1 = require("./ui/statusBar");
-// Import services (using relative paths from extension/src to src/services)
-// Note: These will be resolved at runtime from the extension's location
-const modelProviderRegistry_1 = require("../../../src/services/providers/modelProviderRegistry");
-const ollamaProvider_1 = require("../../../src/services/providers/ollamaProvider");
-const ggufProvider_1 = require("../../../src/services/providers/ggufProvider");
-const apiProviderRegistry_1 = require("../../../src/services/api/apiProviderRegistry");
-const apiKeyManager_1 = require("../../../src/services/api/apiKeyManager");
-const pluginManager_2 = require("../../../src/services/plugins/pluginManager");
+// Import services (copied to extension/src/services by precompile script)
+const modelProviderRegistry_1 = require("./services/providers/modelProviderRegistry");
+const ollamaProvider_1 = require("./services/providers/ollamaProvider");
+const ggufProvider_1 = require("./services/providers/ggufProvider");
+const apiProviderRegistry_1 = require("./services/api/apiProviderRegistry");
+const apiKeyManager_1 = require("./services/api/apiKeyManager");
+const pluginManager_2 = require("./services/plugins/pluginManager");
 let configManager;
 let statusBarManager;
 let modelProviderRegistry;

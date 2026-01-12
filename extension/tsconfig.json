@@ -11,12 +11,8 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "baseUrl": ".",
-    "paths": {
-      "@services/*": ["../src/services/*"]
-    }
+    "noEmitOnError": false
   },
-  "exclude": ["node_modules", ".vscode-test"],
-  "include": ["src/**/*", "../src/services/**/*"]
+  "exclude": ["node_modules", ".vscode-test"]
 }
 
