@@ -5,7 +5,9 @@
  * Exposes safe APIs to the renderer.
  */
 
-import { contextBridge, ipcRenderer } from 'electron';
+// Preload script runs in isolated context
+// Use require for Electron APIs
+const { contextBridge, ipcRenderer } = require('electron');
 
 /**
  * Expose protected methods that allow the renderer process
@@ -28,10 +30,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   // Events
   on: (channel: string, callback: (...args: any[]) => void) => {
-    ipcRenderer.on(channel, (_, ...args) => callback(...args));
+    ipcRenderer.on(channel, (_: any, ...args: any[]) => callback(...args));
   },
   off: (channel: string, callback: (...args: any[]) => void) => {
-    ipcRenderer.removeListener(channel, callback);
+    ipcRenderer.removeListener(channel, callback as any);
   }
 });
 

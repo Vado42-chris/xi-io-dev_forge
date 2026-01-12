@@ -2,8 +2,10 @@
  * Dev Forge Electron - Renderer Process
  * 
  * UI logic for the Electron application.
- * This will eventually integrate Monaco Editor and Dev Forge features.
+ * Integrates Monaco Editor and Dev Forge features.
  */
+
+import { initializeMonacoEditor, setEditor } from './monaco-setup';
 
 // Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', async () => {
@@ -11,6 +13,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Initialize app
   await initializeApp();
+
+  // Initialize Monaco Editor
+  await initializeEditor();
 
   // Update status
   updateStatus('Dev Forge Ready');
@@ -68,25 +73,38 @@ function initializeUI(): void {
     loadingElement.remove();
   }
 
-  // Create placeholder editor area
+  // Create editor container
   const editorArea = document.querySelector('.editor-area');
   if (editorArea) {
     editorArea.innerHTML = `
-      <div style="padding: 20px; color: #CCCCCC;">
-        <h2 style="font-family: 'Antonio', sans-serif; font-weight: 100; margin-bottom: 16px;">
-          Dev Forge Editor
-        </h2>
-        <p style="margin-bottom: 8px;">Monaco Editor will be integrated here.</p>
-        <p style="margin-bottom: 8px;">Dev Forge features will be added:</p>
-        <ul style="margin-left: 24px; margin-top: 8px;">
-          <li>AI Model Management</li>
-          <li>Multi-Model Execution</li>
-          <li>Fire Teams</li>
-          <li>Wargaming Systems</li>
-          <li>Plugin System</li>
-        </ul>
-      </div>
+      <div id="monaco-editor-container" style="width: 100%; height: 100%;"></div>
     `;
+  }
+}
+
+/**
+ * Initialize Monaco Editor
+ */
+async function initializeEditor(): Promise<void> {
+  try {
+    // Wait a bit for DOM to be fully ready
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    // Initialize Monaco Editor
+    const editor = initializeMonacoEditor('monaco-editor-container');
+    setEditor(editor);
+
+    console.log('[Renderer] Monaco Editor initialized');
+
+    // Add editor event listeners
+    editor.onDidChangeModelContent(() => {
+      // Handle content changes
+      updateStatus('Modified');
+    });
+
+  } catch (error) {
+    console.error('[Renderer] Editor initialization error:', error);
+    updateStatus('Error initializing editor');
   }
 }
 
