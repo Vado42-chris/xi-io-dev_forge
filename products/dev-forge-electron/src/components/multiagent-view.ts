@@ -152,30 +152,6 @@ export class MultiagentView {
         });
       });
     });
-
-    container.innerHTML = models.map(model => `
-      <label class="model-checkbox-label">
-        <input 
-          type="checkbox" 
-          class="model-checkbox" 
-          value="${model.id}"
-          ${this.selectedModelIds.has(model.id) ? 'checked' : ''}
-        >
-        <span>${model.name}</span>
-      </label>
-    `).join('');
-
-    // Set up checkbox listeners
-    container.querySelectorAll('.model-checkbox').forEach(checkbox => {
-      checkbox.addEventListener('change', (e) => {
-        const target = e.target as HTMLInputElement;
-        if (target.checked) {
-          this.selectedModelIds.add(target.value);
-        } else {
-          this.selectedModelIds.delete(target.value);
-        }
-      });
-    });
   }
 
   /**
