@@ -18,7 +18,7 @@
   "author": "Xibalba Mixed Media Studio",
   "license": "MIT",
   "dependencies": {
-    "@dev-forge/core": "workspace:*",
+    "@dev-forge/core": "*",
     "@types/vscode": "^1.84.0"
   },
   "devDependencies": {

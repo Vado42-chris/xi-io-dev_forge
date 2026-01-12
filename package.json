@@ -1,35 +1,39 @@
 {
   "name": "dev-forge",
-  "version": "0.1.0",
-  "description": "Multiagent coding engine powered by VectorForge framework",
-  "main": "index.js",
-  "type": "module",
+  "version": "1.0.0",
+  "description": "Multiagent coding engine with extensible model providers, GGUF support, and custom API integration",
+  "private": true,
+  "workspaces": [
+    "packages/*",
+    "extension",
+    "products/*"
+  ],
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview",
-    "test": "vitest",
-    "test:watch": "vitest --watch",
-    "test:coverage": "vitest --coverage",
-    "test:ui": "vitest --ui"
+    "build": "npm run build --workspaces",
+    "build:core": "npm run build --workspace=@dev-forge/core",
+    "build:vscode": "npm run build --workspace=@dev-forge/vscode",
+    "build:extension": "npm run compile --workspace=extension",
+    "watch": "npm run watch --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "clean": "npm run clean --workspaces --if-present && rm -rf node_modules",
+    "install:all": "npm install"
   },
   "keywords": [
-    "coding-engine",
+    "dev-forge",
+    "ai",
+    "coding",
     "multiagent",
-    "vectorforge",
-    "xibalba"
+    "gguf",
+    "plugins"
   ],
-  "author": "Chris Hallberg",
+  "author": "Xibalba Mixed Media Studio",
   "license": "MIT",
-  "dependencies": {
-    "axios": "^1.13.2",
-    "minimatch": "^5.1.6",
-    "node-llama-cpp": "^2.8.16"
-  },
   "devDependencies": {
-    "@types/node": "^20.10.0",
-    "@vitest/ui": "^1.1.0",
-    "typescript": "^5.3.3",
-    "vitest": "^1.1.0"
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
   }
 }

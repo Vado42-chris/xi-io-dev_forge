@@ -33,3 +33,7 @@ export * from './plugins/pluginDiscovery';
 export * from './plugins/pluginSandbox';
 export * from './plugins/permissionValidator';
 
+// Export adapter interfaces
+export type { SecretStorage, ConfigStorage } from './api/apiKeyManager';
+export type { UIAdapter, ConfigAdapter } from './plugins/pluginAPI';
+
