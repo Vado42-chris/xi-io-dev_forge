@@ -10,15 +10,21 @@ import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import { getDatabase } from './database/connection';
+import { getLogger } from './utils/logger';
+import { requestLogger } from './api/middleware/requestLogger';
 import apiRoutes from './api/routes';
 
 // Load environment variables
 dotenv.config();
 
+// Initialize logger
+const logger = getLogger();
+logger.info('Dev Forge Backend starting...');
+
 // Initialize database connection
 const db = getDatabase();
 db.connect().catch(err => {
-  console.error('[Backend] Database connection error:', err);
+  logger.error('Database connection error', { error: err });
   process.exit(1);
 });
 
@@ -33,6 +39,9 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Request logging
+app.use(requestLogger);
 
 // Health check endpoint (root level)
 app.get('/health', (req: express.Request, res: express.Response) => {
@@ -49,7 +58,12 @@ app.use('/api', apiRoutes);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  console.error('[Backend] Error:', err);
+  logger.error('Request error', {
+    error: err.message,
+    stack: err.stack,
+    path: req.path,
+    method: req.method,
+  });
   res.status(err.status || 500).json({
     error: {
       message: err.message || 'Internal server error',
@@ -70,23 +84,25 @@ app.use((req: express.Request, res: express.Response) => {
 
 // Graceful shutdown
 process.on('SIGTERM', async () => {
-  console.log('[Backend] SIGTERM received, shutting down gracefully');
+  logger.info('SIGTERM received, shutting down gracefully');
   await db.close();
   process.exit(0);
 });
 
 process.on('SIGINT', async () => {
-  console.log('[Backend] SIGINT received, shutting down gracefully');
+  logger.info('SIGINT received, shutting down gracefully');
   await db.close();
   process.exit(0);
 });
 
 // Start server
 app.listen(PORT, () => {
-  console.log(`[Backend] Dev Forge Backend API running on port ${PORT}`);
-  console.log(`[Backend] Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`[Backend] Database: ${db.getType()}`);
-  console.log(`[Backend] Health check: http://localhost:${PORT}/health`);
+  logger.info('Dev Forge Backend API started', {
+    port: PORT,
+    environment: process.env.NODE_ENV || 'development',
+    database: db.getType(),
+    healthCheck: `http://localhost:${PORT}/health`,
+  });
 });
 
 export default app;
