@@ -73,7 +73,7 @@ async function activate(context) {
     // Get configuration using VS Code's built-in API
     const config = vscode.workspace.getConfiguration('devForge');
     // Initialize API key manager
-    apiKeyManager = new apiKeyManager_1.ApiKeyManager(context);
+    apiKeyManager = new apiKeyManager_1.ApiKeyManager(context.secrets);
     // Initialize provider registries
     modelProviderRegistry = new modelProviderRegistry_1.ModelProviderRegistry();
     apiProviderRegistry = new apiProviderRegistry_1.ApiProviderRegistry(apiKeyManager);

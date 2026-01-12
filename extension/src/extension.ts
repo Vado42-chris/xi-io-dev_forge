@@ -42,7 +42,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   const config = vscode.workspace.getConfiguration('devForge');
 
   // Initialize API key manager
-  apiKeyManager = new ApiKeyManager(context);
+  apiKeyManager = new ApiKeyManager(context.secrets);
 
   // Initialize provider registries
   modelProviderRegistry = new ModelProviderRegistry();
