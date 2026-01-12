@@ -1,0 +1,614 @@
+{
+  "name": "dev-forge",
+  "displayName": "Dev Forge",
+  "description": "Multiagent coding engine with extensible model providers, GGUF support, and custom API integration",
+  "version": "0.1.0",
+  "publisher": "xibalba",
+  "engines": {
+    "vscode": "^1.84.0"
+  },
+  "categories": [
+    "Other",
+    "Machine Learning",
+    "AI"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "configuration": {
+      "title": "Dev Forge",
+      "properties": {
+        "devForge.models.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable Dev Forge model system"
+        },
+        "devForge.models.defaultProvider": {
+          "type": "string",
+          "enum": [
+            "ollama",
+            "gguf",
+            "api",
+            "plugin"
+          ],
+          "default": "ollama",
+          "description": "Default model provider"
+        },
+        "devForge.models.autoDiscover": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically discover models"
+        },
+        "devForge.models.ollama.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable Ollama provider"
+        },
+        "devForge.models.ollama.baseUrl": {
+          "type": "string",
+          "default": "http://localhost:11434",
+          "description": "Ollama API base URL"
+        },
+        "devForge.models.ollama.timeout": {
+          "type": "number",
+          "default": 30000,
+          "description": "Ollama request timeout (ms)"
+        },
+        "devForge.models.ollama.models": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "enabled": {
+                "type": "boolean",
+                "default": true
+              },
+              "priority": {
+                "type": "number",
+                "default": 0
+              }
+            }
+          },
+          "default": [],
+          "description": "Ollama model configurations"
+        },
+        "devForge.models.gguf.enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable GGUF provider (direct file loading)"
+        },
+        "devForge.models.gguf.modelsDirectory": {
+          "type": "string",
+          "default": "~/.dev-forge/models/gguf",
+          "description": "Directory containing GGUF model files"
+        },
+        "devForge.models.gguf.autoDiscover": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically discover GGUF files"
+        },
+        "devForge.models.gguf.maxMemory": {
+          "type": "number",
+          "default": 4096,
+          "description": "Maximum memory for GGUF models (MB)"
+        },
+        "devForge.models.gguf.models": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "path": {
+                "type": "string"
+              },
+              "quantization": {
+                "type": "string"
+              },
+              "contextSize": {
+                "type": "number",
+                "default": 4096
+              },
+              "enabled": {
+                "type": "boolean",
+                "default": true
+              }
+            }
+          },
+          "default": [],
+          "description": "GGUF model configurations"
+        },
+        "devForge.models.gguf.llamaCppPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to llama.cpp executable (optional, uses node-llama-cpp if empty)"
+        },
+        "devForge.apiProviders.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable custom API providers"
+        },
+        "devForge.apiProviders.providers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "openai",
+                  "anthropic",
+                  "cursor",
+                  "custom"
+                ]
+              },
+              "baseUrl": {
+                "type": "string"
+              },
+              "apiKey": {
+                "type": "string",
+                "description": "API key (stored securely, use ${env:VAR_NAME} for env vars)"
+              },
+              "headers": {
+                "type": "object",
+                "description": "Custom headers"
+              },
+              "enabled": {
+                "type": "boolean",
+                "default": true
+              },
+              "timeout": {
+                "type": "number",
+                "default": 30000
+              },
+              "rateLimit": {
+                "type": "object",
+                "properties": {
+                  "requestsPerMinute": {
+                    "type": "number"
+                  },
+                  "requestsPerHour": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          },
+          "default": [],
+          "description": "Custom API provider configurations"
+        },
+        "devForge.apiProviders.cursor.enabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Enable Cursor API integration"
+        },
+        "devForge.apiProviders.cursor.apiKey": {
+          "type": "string",
+          "description": "Cursor API key (stored securely)"
+        },
+        "devForge.apiProviders.cursor.baseUrl": {
+          "type": "string",
+          "default": "https://api.cursor.sh",
+          "description": "Cursor API base URL"
+        },
+        "devForge.apiProviders.cursor.workspaceId": {
+          "type": "string",
+          "description": "Cursor workspace ID"
+        },
+        "devForge.parallelExecution.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable parallel model execution"
+        },
+        "devForge.parallelExecution.maxConcurrent": {
+          "type": "number",
+          "default": 11,
+          "minimum": 1,
+          "maximum": 50,
+          "description": "Maximum concurrent model executions"
+        },
+        "devForge.parallelExecution.timeout": {
+          "type": "number",
+          "default": 30000,
+          "minimum": 1000,
+          "description": "Default timeout for parallel execution (ms)"
+        },
+        "devForge.parallelExecution.defaultModels": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Default models for parallel execution"
+        },
+        "devForge.parallelExecution.strategy": {
+          "type": "string",
+          "enum": [
+            "all",
+            "selected",
+            "smart"
+          ],
+          "default": "smart",
+          "description": "Model selection strategy for parallel execution"
+        },
+        "devForge.aggregation.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable response aggregation"
+        },
+        "devForge.aggregation.qualityThreshold": {
+          "type": "number",
+          "default": 0.6,
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Quality threshold for filtering responses"
+        },
+        "devForge.aggregation.consensusMethod": {
+          "type": "string",
+          "enum": [
+            "weighted",
+            "voting",
+            "best"
+          ],
+          "default": "weighted",
+          "description": "Consensus generation method"
+        },
+        "devForge.aggregation.topN": {
+          "type": "number",
+          "default": 5,
+          "minimum": 1,
+          "description": "Number of top responses to consider"
+        },
+        "devForge.plugins.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable plugin system"
+        },
+        "devForge.plugins.pluginDirectory": {
+          "type": "string",
+          "default": "~/.dev-forge/plugins",
+          "description": "Directory for user plugins"
+        },
+        "devForge.plugins.autoLoad": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically load plugins on startup"
+        },
+        "devForge.plugins.sandboxed": {
+          "type": "boolean",
+          "default": true,
+          "description": "Run plugins in sandboxed environment"
+        },
+        "devForge.plugins.plugins": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "name": {
+                "type": "string"
+              },
+              "path": {
+                "type": "string"
+              },
+              "enabled": {
+                "type": "boolean",
+                "default": true
+              },
+              "permissions": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "default": [],
+          "description": "Plugin configurations"
+        },
+        "devForge.fireTeams.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable Fire Teams system"
+        },
+        "devForge.fireTeams.maxTeams": {
+          "type": "number",
+          "default": 10,
+          "description": "Maximum number of fire teams"
+        },
+        "devForge.fireTeams.maxAgentsPerTeam": {
+          "type": "number",
+          "default": 5,
+          "description": "Maximum agents per fire team"
+        },
+        "devForge.hr.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable HR system"
+        },
+        "devForge.hr.maxAgents": {
+          "type": "number",
+          "default": 50,
+          "description": "Maximum number of agents"
+        },
+        "devForge.hr.autoAssign": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically assign agents to tasks"
+        },
+        "devForge.sprints.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable sprint system"
+        },
+        "devForge.sprints.sprintDuration": {
+          "type": "number",
+          "default": 7,
+          "description": "Sprint duration in days"
+        },
+        "devForge.sprints.autoStart": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically start new sprints"
+        },
+        "devForge.wargaming.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable wargaming system"
+        },
+        "devForge.wargaming.scenarioDirectory": {
+          "type": "string",
+          "default": "~/.dev-forge/wargaming/scenarios",
+          "description": "Directory for wargaming scenarios"
+        },
+        "devForge.reaperspace.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable Reaperspace system"
+        },
+        "devForge.reaperspace.monitoringInterval": {
+          "type": "number",
+          "default": 5000,
+          "description": "Monitoring interval (ms)"
+        },
+        "devForge.blockchain.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable blockchain system"
+        },
+        "devForge.blockchain.chainDirectory": {
+          "type": "string",
+          "default": "~/.dev-forge/blockchain",
+          "description": "Blockchain data directory"
+        },
+        "devForge.marketplace.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable marketplace"
+        },
+        "devForge.marketplace.marketplaceUrl": {
+          "type": "string",
+          "default": "https://marketplace.dev-forge.com",
+          "description": "Marketplace API URL"
+        },
+        "devForge.personas.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable persona system"
+        },
+        "devForge.personas.personaDirectory": {
+          "type": "string",
+          "default": "~/.dev-forge/personas",
+          "description": "Directory for persona dotfiles"
+        },
+        "devForge.personas.antiGhosting": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable anti-ghosting (persona dotfile system)"
+        },
+        "devForge.personas.betweenTheLines": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable 'between the lines' schema filtering"
+        },
+        "devForge.imageGeneration.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable image generation"
+        },
+        "devForge.imageGeneration.defaultStyle": {
+          "type": "string",
+          "default": "35mm-noir-editorial",
+          "description": "Default image generation style"
+        },
+        "devForge.imageGeneration.defaultSize": {
+          "type": "string",
+          "enum": [
+            "1K",
+            "2K",
+            "4K"
+          ],
+          "default": "1K",
+          "description": "Default image size"
+        },
+        "devForge.videoGeneration.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable video generation"
+        },
+        "devForge.performance.cacheEnabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable response caching"
+        },
+        "devForge.performance.cacheSize": {
+          "type": "number",
+          "default": 100,
+          "description": "Cache size (number of responses)"
+        },
+        "devForge.performance.maxMemory": {
+          "type": "number",
+          "default": 8192,
+          "description": "Maximum memory usage (MB)"
+        },
+        "devForge.ui.theme": {
+          "type": "string",
+          "enum": [
+            "xibalba-dark",
+            "xibalba-light",
+            "custom"
+          ],
+          "default": "xibalba-dark",
+          "description": "UI theme"
+        },
+        "devForge.ui.showModelStatus": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show model status in status bar"
+        },
+        "devForge.ui.showAgentCount": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show agent count in status bar"
+        },
+        "devForge.ui.autoRefresh": {
+          "type": "boolean",
+          "default": true,
+          "description": "Auto-refresh UI components"
+        },
+        "devForge.ui.refreshInterval": {
+          "type": "number",
+          "default": 5000,
+          "description": "UI refresh interval (ms)"
+        },
+        "devForge.logging.level": {
+          "type": "string",
+          "enum": [
+            "debug",
+            "info",
+            "warn",
+            "error"
+          ],
+          "default": "info",
+          "description": "Logging level"
+        },
+        "devForge.logging.logFile": {
+          "type": "string",
+          "default": "~/.dev-forge/logs/dev-forge.log",
+          "description": "Log file path"
+        },
+        "devForge.logging.maxLogSize": {
+          "type": "number",
+          "default": 10,
+          "description": "Maximum log file size (MB)"
+        },
+        "devForge.security.apiKeyStorage": {
+          "type": "string",
+          "enum": [
+            "secretStorage",
+            "keychain",
+            "env"
+          ],
+          "default": "secretStorage",
+          "description": "API key storage method"
+        },
+        "devForge.security.pluginSandboxing": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable plugin sandboxing"
+        },
+        "devForge.security.modelValidation": {
+          "type": "boolean",
+          "default": true,
+          "description": "Validate model files before loading"
+        }
+      }
+    },
+    "commands": [
+      {
+        "command": "devForge.settings.open",
+        "title": "Open Dev Forge Settings"
+      },
+      {
+        "command": "devForge.models.select",
+        "title": "Select Model"
+      },
+      {
+        "command": "devForge.models.load",
+        "title": "Load Model"
+      },
+      {
+        "command": "devForge.models.unload",
+        "title": "Unload Model"
+      },
+      {
+        "command": "devForge.gguf.scan",
+        "title": "Scan for GGUF Models"
+      },
+      {
+        "command": "devForge.apiProviders.add",
+        "title": "Add API Provider"
+      },
+      {
+        "command": "devForge.apiProviders.configure",
+        "title": "Configure API Provider"
+      },
+      {
+        "command": "devForge.plugins.manage",
+        "title": "Manage Plugins"
+      },
+      {
+        "command": "devForge.plugins.install",
+        "title": "Install Plugin"
+      },
+      {
+        "command": "devForge.execute.parallel",
+        "title": "Execute on All Models"
+      },
+      {
+        "command": "devForge.execute.selected",
+        "title": "Execute on Selected Models"
+      },
+      {
+        "command": "devForge.chat.open",
+        "title": "Open Chat"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src --ext ts",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.28",
+    "@types/vscode": "^1.108.1",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "eslint": "^8.54.0",
+    "typescript": "^5.9.3"
+  }
+}
