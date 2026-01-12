@@ -12,6 +12,8 @@ import dotenv from 'dotenv';
 import { getDatabase } from './database/connection';
 import { getLogger } from './utils/logger';
 import { requestLogger } from './api/middleware/requestLogger';
+import { rateLimiter } from './api/middleware/rateLimiter';
+import { errorHandler } from './api/middleware/errorHandler';
 import apiRoutes from './api/routes';
 
 // Load environment variables
@@ -54,6 +56,9 @@ app.use(express.urlencoded({ extended: true }));
 // Request logging
 app.use(requestLogger);
 
+// Rate limiting
+app.use(rateLimiter(60000, 100)); // 100 requests per minute
+
 // Health check endpoint (root level)
 app.get('/health', (req: express.Request, res: express.Response) => {
   res.json({
@@ -67,21 +72,8 @@ app.get('/health', (req: express.Request, res: express.Response) => {
 // API routes
 app.use('/api', apiRoutes);
 
-// Error handling middleware
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
-  logger.error('Request error', {
-    error: err.message,
-    stack: err.stack,
-    path: req.path,
-    method: req.method,
-  });
-  res.status(err.status || 500).json({
-    error: {
-      message: err.message || 'Internal server error',
-      status: err.status || 500
-    }
-  });
-});
+// Error handling middleware (must be last)
+app.use(errorHandler);
 
 // 404 handler
 app.use((req: express.Request, res: express.Response) => {
