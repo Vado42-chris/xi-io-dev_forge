@@ -123,12 +123,35 @@ export class MultiagentView {
     const container = this.container.querySelector('#model-checkboxes');
     if (!container) return;
 
-    // TODO: Get models from ModelManager
-    const models = [
-      { id: 'ollama-llama2', name: 'Llama 2' },
-      { id: 'ollama-mistral', name: 'Mistral' },
-      { id: 'ollama-codellama', name: 'CodeLlama' },
-    ];
+    // Import ModelManager dynamically
+    import('../model-manager').then(({ modelManager }) => {
+      const models = modelManager.getEnabledModels();
+      
+      container.innerHTML = models.map(model => `
+        <label class="model-checkbox-label">
+          <input 
+            type="checkbox" 
+            class="model-checkbox" 
+            value="${model.id}"
+            ${this.selectedModelIds.has(model.id) ? 'checked' : ''}
+            ${model.status !== 'available' ? 'disabled' : ''}
+          >
+          <span>${model.name} ${model.status !== 'available' ? '(unavailable)' : ''}</span>
+        </label>
+      `).join('');
+
+      // Set up checkbox listeners
+      container.querySelectorAll('.model-checkbox').forEach(checkbox => {
+        checkbox.addEventListener('change', (e) => {
+          const target = e.target as HTMLInputElement;
+          if (target.checked) {
+            this.selectedModelIds.add(target.value);
+          } else {
+            this.selectedModelIds.delete(target.value);
+          }
+        });
+      });
+    });
 
     container.innerHTML = models.map(model => `
       <label class="model-checkbox-label">

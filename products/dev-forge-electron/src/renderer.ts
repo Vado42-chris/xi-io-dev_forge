@@ -17,6 +17,7 @@ import { MultiagentView } from './components/multiagent-view';
 import { modelManager } from './model-manager';
 import { fireTeamsSystem } from './systems/fire-teams';
 import { MultiModelExecutor } from './services/multi-model-executor';
+import { SystemIntegration } from './services/system-integration';
 
 // Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', async () => {
@@ -75,6 +76,9 @@ async function initializeApp(): Promise<void> {
 
     // Initialize Multi-Model Executor
     initializeMultiModelExecutor();
+
+    // Initialize System Integration
+    await initializeSystemIntegration();
 
     // Initialize Multiagent View
     await initializeMultiagentView();
@@ -225,6 +229,9 @@ let appConfig: AppConfigManager | null = null;
 // Multi-model executor instance
 let multiModelExecutor: MultiModelExecutor | null = null;
 
+// System integration instance
+let systemIntegration: SystemIntegration | null = null;
+
 /**
  * Initialize status manager
  */
@@ -278,6 +285,31 @@ async function initializeFireTeamsPanel(): Promise<void> {
 }
 
 /**
+ * Initialize System Integration
+ */
+async function initializeSystemIntegration(): Promise<void> {
+  try {
+    if (!multiModelExecutor) {
+      console.warn('[Renderer] Multi-Model Executor not initialized yet');
+      return;
+    }
+
+    systemIntegration = new SystemIntegration(
+      modelManager,
+      fireTeamsSystem,
+      multiModelExecutor
+    );
+    
+    await systemIntegration.initialize();
+    console.log('[Renderer] System Integration initialized');
+    updateStatus('All systems integrated', 2000);
+  } catch (error) {
+    console.error('[Renderer] System Integration initialization error:', error);
+    updateStatus('System integration error', 5000);
+  }
+}
+
+/**
  * Initialize Multiagent View
  */
 async function initializeMultiagentView(): Promise<void> {
@@ -307,11 +339,6 @@ async function initializeMultiagentView(): Promise<void> {
 function initializeMultiModelExecutor(): void {
   multiModelExecutor = new MultiModelExecutor(modelManager);
   console.log('[Renderer] Multi-Model Executor initialized');
-  
-  // Initialize multiagent view after executor is ready
-  setTimeout(() => {
-    initializeMultiagentView();
-  }, 100);
 }
 
 /**
