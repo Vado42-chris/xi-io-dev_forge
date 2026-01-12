@@ -33,9 +33,9 @@ export class AnthropicProvider extends BaseApiProvider {
 
     const response = await this.client.post(endpoint, requestBody, {
       headers: {
-        ...this.client.defaults.headers,
-        'anthropic-version': '2023-06-01'
-      }
+        'anthropic-version': '2023-06-01',
+        ...(this.client.defaults.headers.common as Record<string, string>)
+      } as any
     });
     
     return response.data.content[0].text;
@@ -60,9 +60,9 @@ export class AnthropicProvider extends BaseApiProvider {
     const response = await this.client.post(endpoint, requestBody, {
       responseType: 'stream',
       headers: {
-        ...this.client.defaults.headers,
-        'anthropic-version': '2023-06-01'
-      }
+        'anthropic-version': '2023-06-01',
+        ...(this.client.defaults.headers.common as Record<string, string>)
+      } as any
     });
 
     // Parse SSE stream

@@ -18,6 +18,8 @@ export * from './providers/ggufProvider';
 export * from './api/types';
 export * from './api/apiProviderRegistry';
 export * from './api/apiKeyManager';
+// Re-export GenerateOptions and HealthStatus from core types (not API types to avoid conflicts)
+export type { GenerateOptions, HealthStatus } from './types/index';
 export * from './api/providers/cursorApiProvider';
 export * from './api/providers/openAiProvider';
 export * from './api/providers/anthropicProvider';

@@ -74,8 +74,7 @@ export class PluginManager {
     const discoveredPlugins = await this.discovery.discoverPlugins(this.pluginDirectory);
     
     // Load enabled plugins
-    const config = vscode.workspace.getConfiguration('devForge');
-    const autoLoad = config.get<boolean>('plugins.autoLoad', true);
+    const autoLoad = this.config.autoLoad !== false;
     
     if (autoLoad) {
       for (const manifest of discoveredPlugins) {
@@ -97,14 +96,11 @@ export class PluginManager {
    * Get plugin configuration
    */
   private getPluginConfig(pluginId: string): PluginConfig {
-    const config = vscode.workspace.getConfiguration('devForge');
-    const plugins = config.get<any[]>('plugins.plugins', []);
-    const pluginConfig = plugins.find((p: any) => p.id === pluginId);
-    
+    // Plugin config should be provided via config adapter in future
+    // For now, return default enabled config
     return {
       id: pluginId,
-      enabled: pluginConfig?.enabled !== false,
-      permissions: pluginConfig?.permissions
+      enabled: true
     };
   }
 
@@ -173,11 +169,7 @@ export class PluginManager {
     if (!manifest.apiVersion) errors.push('Missing apiVersion');
     if (!manifest.main) errors.push('Missing main');
 
-    // Validate API version compatibility
-    const currentApiVersion = '1.0.0';
-    if (manifest.apiVersion !== currentApiVersion) {
-      warnings.push(`API version mismatch: plugin uses ${manifest.apiVersion}, current is ${currentApiVersion}`);
-    }
+    // Note: API version validation removed - will be handled by adapters if needed
 
     // Validate plugin file exists
     const pluginPath = path.join(this.pluginDirectory, manifest.id);
@@ -203,18 +195,18 @@ export class PluginManager {
   ): PluginContext {
     const permissionValidator = new PermissionValidator();
     const pluginAPI = new PluginAPI(
-      vscode,
       permissionValidator,
       this.modelProviderRegistry,
       this.apiProviderRegistry,
       pluginConfig.permissions || {}
+      // UI and config adapters will be provided by framework-specific adapters
     );
 
     return {
-      vscode,
-      devForge: pluginAPI,
+      pluginId: plugin.id,
       pluginPath,
-      pluginConfig
+      api: pluginAPI,
+      config: pluginConfig
     };
   }
 

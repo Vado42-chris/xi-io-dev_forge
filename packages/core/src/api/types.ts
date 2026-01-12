@@ -123,7 +123,7 @@ export interface ApiProvider {
   /**
    * Stream a response (optional)
    */
-  stream?(prompt: string, options?: GenerateOptions): AsyncGenerator<string>;
+  stream?(prompt: string, options?: import('../types').GenerateOptions): AsyncGenerator<string>;
 
   /**
    * Get available models
@@ -138,7 +138,7 @@ export interface ApiProvider {
   /**
    * Check provider health
    */
-  getHealth(): Promise<HealthStatus>;
+  getHealth(): Promise<import('../types').HealthStatus>;
 
   /**
    * Check if provider is available
@@ -157,7 +157,7 @@ export interface ApiProvider {
 export interface ApiRequest {
   prompt: string;
   model?: string;
-  options?: GenerateOptions;
+  options?: import('../types').GenerateOptions;
 }
 
 /**

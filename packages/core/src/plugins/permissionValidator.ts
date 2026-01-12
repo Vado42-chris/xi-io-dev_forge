@@ -5,7 +5,7 @@
  */
 
 import { PluginPermissions } from './types';
-import * as minimatch from 'minimatch';
+import { minimatch } from 'minimatch';
 
 export class PermissionValidator {
   /**
