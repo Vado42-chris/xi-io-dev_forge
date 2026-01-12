@@ -21,7 +21,9 @@
   ],
   "author": "Chris Hallberg",
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "node-llama-cpp": "^2.8.16"
+  },
   "devDependencies": {
     "@types/node": "^20.10.0",
     "@vitest/ui": "^1.1.0",
