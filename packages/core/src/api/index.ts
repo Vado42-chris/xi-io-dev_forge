@@ -10,6 +10,7 @@ export { PaymentService, CheckoutSessionParams, CheckoutSessionResponse, Payment
 export { LicenseService, License, CreateLicenseParams, ValidateLicenseResponse } from './licenseService';
 export { ExtensionService, Extension, CreateExtensionParams, ExtensionReview, CreateReviewParams } from './extensionService';
 export { SupportService, SupportTicket, SupportMessage, CreateTicketParams, KnowledgeBaseArticle } from './supportService';
+export { WebSocketClient, WebSocketEvent, WebSocketEventType, WebSocketEventHandler } from './websocketClient';
 
 /**
  * Create API services instance
