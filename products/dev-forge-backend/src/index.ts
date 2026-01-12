@@ -15,6 +15,7 @@ import { logger } from './utils/logger';
 import { errorHandler } from './middleware/errorHandler';
 import { rateLimiter } from './middleware/rateLimiter';
 import { testConnection } from './config/database';
+import { runMigrations } from './config/migrations';
 
 // Load environment variables
 dotenv.config();
@@ -74,7 +75,18 @@ app.listen(PORT, async () => {
   logger.info(`🔗 Health check: http://localhost:${PORT}/health`);
   
   // Test database connection
-  await testConnection();
+  const dbConnected = await testConnection();
+  if (!dbConnected) {
+    logger.warn('Database connection failed, but server started anyway');
+  }
+  
+  // Run migrations
+  try {
+    await runMigrations();
+  } catch (error: any) {
+    logger.error('Migration failed:', error);
+    // Continue anyway - migrations can be run manually
+  }
 });
 
 export default app;
