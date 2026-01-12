@@ -1,0 +1,176 @@
+/**
+ * Command Palette Styles
+ * 
+ * Styling for the command palette panel using Xibalba Framework.
+ */
+
+.command-palette-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 9998;
+  backdrop-filter: blur(2px);
+}
+
+.command-palette-container {
+  position: fixed;
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 600px;
+  max-width: 90vw;
+  background: var(--xibalba-surface, #1e1e1e);
+  border: 1px solid var(--xibalba-border, #2d2d2d);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  max-height: 70vh;
+}
+
+.command-palette-container.hidden {
+  display: none;
+}
+
+.command-palette-header {
+  padding: var(--spacing-md, 16px);
+  border-bottom: 1px solid var(--xibalba-border, #2d2d2d);
+}
+
+.command-palette-input {
+  width: 100%;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--xibalba-text-primary, #FFFFFF);
+  font-family: var(--font-tech, 'JetBrains Mono', monospace);
+  font-size: 16px;
+  padding: var(--spacing-sm, 8px);
+}
+
+.command-palette-input::placeholder {
+  color: var(--xibalba-text-secondary, #CCCCCC);
+  opacity: 0.6;
+}
+
+.command-palette-results {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 400px;
+  padding: var(--spacing-xs, 4px);
+}
+
+.command-palette-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-sm, 8px) var(--spacing-md, 16px);
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.command-palette-item:hover {
+  background: var(--xibalba-secondary, #2d2d2d);
+  border-color: var(--xibalba-border, #2d2d2d);
+}
+
+.command-palette-item.selected {
+  background: var(--xibalba-primary, #007acc);
+  border-color: var(--xibalba-primary, #007acc);
+  color: var(--xibalba-text-primary, #FFFFFF);
+}
+
+.command-palette-item-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: var(--spacing-xs, 4px);
+}
+
+.command-palette-item-label {
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--xibalba-text-primary, #FFFFFF);
+}
+
+.command-palette-item.selected .command-palette-item-label {
+  color: var(--xibalba-text-primary, #FFFFFF);
+}
+
+.command-palette-item-description {
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 12px;
+  color: var(--xibalba-text-secondary, #CCCCCC);
+  opacity: 0.8;
+}
+
+.command-palette-item.selected .command-palette-item-description {
+  color: var(--xibalba-text-primary, #FFFFFF);
+  opacity: 0.9;
+}
+
+.command-palette-item-category {
+  font-family: var(--font-tech, 'JetBrains Mono', monospace);
+  font-size: 10px;
+  color: var(--xibalba-text-secondary, #CCCCCC);
+  text-transform: uppercase;
+  padding: var(--spacing-xs, 4px) var(--spacing-sm, 8px);
+  background: var(--xibalba-secondary, #2d2d2d);
+  border-radius: var(--border-radius, 4px);
+}
+
+.command-palette-item.selected .command-palette-item-category {
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--xibalba-text-primary, #FFFFFF);
+}
+
+.command-palette-item mark {
+  background: var(--xibalba-accent, #007acc);
+  color: var(--xibalba-text-primary, #FFFFFF);
+  padding: 0 2px;
+}
+
+.command-palette-empty {
+  padding: var(--spacing-lg, 24px);
+  text-align: center;
+  color: var(--xibalba-text-secondary, #CCCCCC);
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 14px;
+}
+
+.command-palette-footer {
+  padding: var(--spacing-sm, 8px) var(--spacing-md, 16px);
+  border-top: 1px solid var(--xibalba-border, #2d2d2d);
+  background: var(--xibalba-secondary, #2d2d2d);
+}
+
+.command-palette-hint {
+  font-family: var(--font-tech, 'JetBrains Mono', monospace);
+  font-size: 11px;
+  color: var(--xibalba-text-secondary, #CCCCCC);
+  opacity: 0.7;
+}
+
+/* Scrollbar styling */
+.command-palette-results::-webkit-scrollbar {
+  width: 6px;
+}
+
+.command-palette-results::-webkit-scrollbar-track {
+  background: var(--xibalba-surface, #1e1e1e);
+}
+
+.command-palette-results::-webkit-scrollbar-thumb {
+  background: var(--xibalba-border, #2d2d2d);
+  border-radius: 3px;
+}
+
+.command-palette-results::-webkit-scrollbar-thumb:hover {
+  background: var(--xibalba-primary, #007acc);
+}
+
