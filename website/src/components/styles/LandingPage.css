@@ -1,0 +1,141 @@
+.landing-page {
+  width: 100%;
+}
+
+/* Hero Section */
+.hero {
+  padding: 120px 0;
+  text-align: center;
+  background: linear-gradient(180deg, var(--xibalba-bg-dark) 0%, var(--xibalba-bg-darker) 100%);
+}
+
+.hero-content {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.hero-title {
+  font-size: 4.5rem;
+  margin-bottom: 24px;
+  background: linear-gradient(135deg, #FFFFFF 0%, #007acc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-subtitle {
+  font-size: 1.75rem;
+  color: var(--xibalba-text-secondary);
+  margin-bottom: 24px;
+  font-weight: 300;
+}
+
+.hero-description {
+  font-size: 1.25rem;
+  color: var(--xibalba-text-secondary);
+  margin-bottom: 48px;
+  line-height: 1.8;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-large {
+  padding: 16px 32px;
+  font-size: 1.125rem;
+}
+
+/* Features Section */
+.features {
+  padding: 80px 0;
+}
+
+.section-title {
+  text-align: center;
+  margin-bottom: 64px;
+  font-size: 3rem;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 32px;
+}
+
+.feature-card {
+  padding: 32px;
+  background-color: #1e1e1e;
+  border: 1px solid var(--xibalba-border);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.feature-card:hover {
+  border-color: var(--xibalba-accent);
+  transform: translateY(-4px);
+}
+
+.feature-card h3 {
+  font-size: 1.5rem;
+  margin-bottom: 16px;
+  color: var(--xibalba-text-primary);
+}
+
+.feature-card p {
+  color: var(--xibalba-text-secondary);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+/* CTA Section */
+.cta {
+  padding: 120px 0;
+  text-align: center;
+  background: linear-gradient(180deg, var(--xibalba-bg-darker) 0%, var(--xibalba-bg-dark) 100%);
+}
+
+.cta-title {
+  font-size: 3rem;
+  margin-bottom: 24px;
+}
+
+.cta-description {
+  font-size: 1.25rem;
+  color: var(--xibalba-text-secondary);
+  margin-bottom: 48px;
+}
+
+@media (max-width: 768px) {
+  .hero {
+    padding: 80px 0;
+  }
+  
+  .hero-title {
+    font-size: 3rem;
+  }
+  
+  .hero-subtitle {
+    font-size: 1.5rem;
+  }
+  
+  .features {
+    padding: 60px 0;
+  }
+  
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .cta {
+    padding: 80px 0;
+  }
+  
+  .cta-title {
+    font-size: 2rem;
+  }
+}
+

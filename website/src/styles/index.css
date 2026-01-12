@@ -1,0 +1,142 @@
+/**
+ * Dev Forge Marketing Website - Xibalba Framework Styles
+ * 
+ * Pattern #209: 5 Feet Back Test - Large, readable
+ * Pattern #210: Fewer Boxes - Minimal borders
+ * Pattern #211: Proportional Weight Balance
+ * Pattern #156: Universal Access
+ */
+
+/* Xibalba Framework - Base Styles */
+@import url('https://fonts.googleapis.com/css2?family=Antonio:wght@100;400&family=Inter:wght@300;400;700&family=JetBrains+Mono:wght@400;700&display=swap');
+
+:root {
+  /* Xibalba Framework Colors */
+  --xibalba-bg-dark: #050505;
+  --xibalba-bg-darker: #000000;
+  --xibalba-text-primary: #FFFFFF;
+  --xibalba-text-secondary: #CCCCCC;
+  --xibalba-accent: #007acc;
+  --xibalba-accent-hover: #0099ff;
+  --xibalba-border: #2d2d2d;
+  
+  /* Typography */
+  --font-tall-thin: 'Antonio', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --font-tech: 'JetBrains Mono', monospace;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--xibalba-bg-dark);
+  color: var(--xibalba-text-primary);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Typography - Pattern #209: Large, readable */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-tall-thin);
+  font-weight: 100;
+  letter-spacing: 2px;
+  line-height: 1.2;
+}
+
+h1 {
+  font-size: 3.5rem;
+  margin-bottom: 1.5rem;
+}
+
+h2 {
+  font-size: 2.5rem;
+  margin-bottom: 1.25rem;
+}
+
+h3 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+p {
+  font-size: 1.125rem;
+  line-height: 1.8;
+  margin-bottom: 1rem;
+}
+
+/* Links */
+a {
+  color: var(--xibalba-accent);
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+a:hover {
+  color: var(--xibalba-accent-hover);
+}
+
+/* Buttons */
+button {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  padding: 12px 24px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background-color: var(--xibalba-accent);
+  color: var(--xibalba-text-primary);
+}
+
+.btn-primary:hover {
+  background-color: var(--xibalba-accent-hover);
+}
+
+.btn-secondary {
+  background-color: transparent;
+  color: var(--xibalba-text-primary);
+  border: 1px solid var(--xibalba-border);
+}
+
+.btn-secondary:hover {
+  border-color: var(--xibalba-accent);
+  color: var(--xibalba-accent);
+}
+
+/* Pattern #210: Fewer Boxes - Minimal borders */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* Pattern #156: Universal Access */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 2.5rem;
+  }
+  
+  h2 {
+    font-size: 2rem;
+  }
+  
+  p {
+    font-size: 1rem;
+  }
+}
+

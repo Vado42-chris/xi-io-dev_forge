@@ -1,0 +1,22 @@
+.not-found-page {
+  padding: 120px 0;
+  text-align: center;
+}
+
+.not-found-content h1 {
+  font-size: 6rem;
+  margin-bottom: 16px;
+  color: var(--xibalba-accent);
+}
+
+.not-found-content h2 {
+  font-size: 2rem;
+  margin-bottom: 16px;
+}
+
+.not-found-content p {
+  font-size: 1.25rem;
+  color: var(--xibalba-text-secondary);
+  margin-bottom: 32px;
+}
+
