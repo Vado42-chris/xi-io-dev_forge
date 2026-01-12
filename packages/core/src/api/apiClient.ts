@@ -6,6 +6,8 @@
  */
 
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosError, AxiosResponse } from 'axios';
+import { RequestCache } from './utils/requestCache';
+import { RateLimiter } from './utils/rateLimiter';
 
 export interface ApiClientConfig {
   baseURL: string;
@@ -33,6 +35,8 @@ export class ApiClient {
   private client: AxiosInstance;
   private config: ApiClientConfig;
   private token: string | null = null;
+  private cache: RequestCache;
+  private rateLimiter: RateLimiter;
 
   constructor(config: ApiClientConfig) {
     this.config = {
@@ -49,6 +53,15 @@ export class ApiClient {
         'Content-Type': 'application/json',
       },
     });
+
+    // Initialize cache and rate limiter
+    this.cache = new RequestCache();
+    this.rateLimiter = new RateLimiter();
+
+    // Clean up expired cache entries periodically
+    setInterval(() => {
+      this.cache.clearExpired();
+    }, 60 * 1000); // Every minute
 
     this.setupInterceptors();
   }
@@ -124,10 +137,39 @@ export class ApiClient {
   /**
    * Make GET request
    */
-  async get<T = any>(url: string, config?: AxiosRequestConfig): Promise<ApiResponse<T>> {
+  async get<T = any>(url: string, config?: AxiosRequestConfig & { useCache?: boolean; cacheTTL?: number }): Promise<ApiResponse<T>> {
+    const useCache = config?.useCache !== false; // Default to true
+    const cacheKey = RequestCache.generateKey('GET', url, config?.params);
+
+    // Check cache first
+    if (useCache) {
+      const cached = this.cache.get<T>(cacheKey);
+      if (cached !== null) {
+        return { success: true, data: cached };
+      }
+    }
+
+    // Check rate limit
+    if (!this.rateLimiter.isAllowed('api-requests')) {
+      return {
+        success: false,
+        error: {
+          message: 'Rate limit exceeded. Please try again later.',
+          code: 'RATE_LIMIT_EXCEEDED',
+        },
+      };
+    }
+
     try {
       const response = await this.client.get<ApiResponse<T>>(url, config);
-      return this.formatResponse(response);
+      const formatted = this.formatResponse(response);
+
+      // Cache successful responses
+      if (useCache && formatted.success && formatted.data) {
+        this.cache.set(cacheKey, formatted.data, config?.cacheTTL);
+      }
+
+      return formatted;
     } catch (error) {
       return this.formatError(error);
     }
