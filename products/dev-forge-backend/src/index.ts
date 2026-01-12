@@ -61,6 +61,7 @@ import chatbotRoutes from './routes/chatbot';
 import forumRoutes from './routes/forum';
 import financialRoutes from './routes/financial';
 import analyticsRoutes from './routes/analytics';
+import distributionRoutes from './routes/distribution';
 
 app.use('/api/auth', authRoutes);
 app.use('/api/payments', paymentRoutes);
@@ -72,6 +73,7 @@ app.use('/api/chatbot', chatbotRoutes);
 app.use('/api/forum', forumRoutes);
 app.use('/api/financial', financialRoutes);
 app.use('/api/analytics', analyticsRoutes);
+app.use('/api/distribution', distributionRoutes);
 
 // 404 handler
 app.use((req, res) => {
