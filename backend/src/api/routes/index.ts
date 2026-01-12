@@ -6,6 +6,7 @@
 
 import { Router } from 'express';
 import authRoutes from './auth';
+import licenseRoutes from './licenses';
 
 const router = Router();
 
@@ -27,8 +28,8 @@ router.get('/', (req, res) => {
     endpoints: {
       health: '/api/health',
       auth: '/api/auth',
+      licenses: '/api/licenses',
       users: '/api/users (coming soon)',
-      licenses: '/api/licenses (coming soon)',
       extensions: '/api/extensions (coming soon)',
       support: '/api/support (coming soon)',
     }
@@ -37,6 +38,9 @@ router.get('/', (req, res) => {
 
 // Auth routes
 router.use('/auth', authRoutes);
+
+// License routes
+router.use('/licenses', licenseRoutes);
 
 export default router;
 
