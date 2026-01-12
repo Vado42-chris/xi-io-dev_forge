@@ -18,11 +18,13 @@ import { PromptPanel } from './components/prompt-panel';
 import { PersonaPanel } from './components/persona-panel';
 import { SprintPanel } from './components/sprint-panel';
 import { WargamingPanel } from './components/wargaming-panel';
+import { MarketplacePanel } from './components/marketplace-panel';
 import { modelManager } from './model-manager';
 import { fireTeamsSystem } from './systems/fire-teams';
 import { personaSystem } from './systems/persona-system';
 import { sprintSystem } from './systems/sprint-system';
 import { wargamingSystem } from './systems/wargaming-system';
+import { marketplaceSystem } from './systems/marketplace-system';
 import { MultiModelExecutor } from './services/multi-model-executor';
 import { SystemIntegration } from './services/system-integration';
 
@@ -89,6 +91,9 @@ async function initializeApp(): Promise<void> {
 
     // Initialize Wargaming Panel
     await initializeWargamingPanel();
+
+    // Initialize Marketplace Panel
+    await initializeMarketplacePanel();
 
     // Initialize Multi-Model Executor
     initializeMultiModelExecutor();
@@ -345,6 +350,21 @@ async function initializeWargamingPanel(): Promise<void> {
   } catch (error) {
     console.error('[Renderer] Wargaming Panel initialization error:', error);
     updateStatus('Wargaming Panel error', 5000);
+  }
+}
+
+/**
+ * Initialize Marketplace Panel
+ */
+async function initializeMarketplacePanel(): Promise<void> {
+  try {
+    const marketplacePanel = new MarketplacePanel('marketplace-panel-container', marketplaceSystem);
+    marketplacePanel.render();
+    console.log('[Renderer] Marketplace Panel initialized');
+    updateStatus('Marketplace Panel ready', 2000);
+  } catch (error) {
+    console.error('[Renderer] Marketplace Panel initialization error:', error);
+    updateStatus('Marketplace Panel error', 5000);
   }
 }
 
