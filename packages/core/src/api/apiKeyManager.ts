@@ -1,24 +1,44 @@
 /**
  * API Key Manager
  * 
- * Manages API keys securely using VS Code SecretStorage.
+ * Manages API keys securely using a storage abstraction.
+ * Framework-agnostic implementation.
  */
 
-import * as vscode from 'vscode';
+/**
+ * Secret Storage Interface
+ * Abstracts storage mechanism (VS Code SecretStorage, Node.js keychain, etc.)
+ */
+export interface SecretStorage {
+  store(key: string, value: string): Promise<void>;
+  get(key: string): Promise<string | undefined>;
+  delete(key: string): Promise<void>;
+}
+
+/**
+ * Configuration Interface
+ * Abstracts configuration access
+ */
+export interface ConfigStorage {
+  get<T>(key: string, defaultValue?: T): T | undefined;
+}
 
 export class ApiKeyManager {
-  private secretStorage: vscode.SecretStorage;
-  private config: vscode.WorkspaceConfiguration;
+  private secretStorage?: SecretStorage;
+  private config?: ConfigStorage;
 
-  constructor(context: vscode.ExtensionContext) {
-    this.secretStorage = context.secrets;
-    this.config = vscode.workspace.getConfiguration('devForge');
+  constructor(secretStorage?: SecretStorage, config?: ConfigStorage) {
+    this.secretStorage = secretStorage;
+    this.config = config;
   }
 
   /**
    * Store API key securely
    */
   async storeApiKey(providerId: string, apiKey: string): Promise<void> {
+    if (!this.secretStorage) {
+      throw new Error('Secret storage not configured');
+    }
     const key = `devForge.${providerId}.apiKey`;
     await this.secretStorage.store(key, apiKey);
   }
@@ -28,27 +48,29 @@ export class ApiKeyManager {
    */
   async getApiKey(providerId: string): Promise<string | undefined> {
     // Try SecretStorage first
-    const key = `devForge.${providerId}.apiKey`;
-    let apiKey = await this.secretStorage.get(key);
-    
-    // Fallback to config (for env var references)
-    if (!apiKey) {
-      const configKey = this.config.get<string>(`apiProviders.providers.${providerId}.apiKey`);
-      if (configKey?.startsWith('${env:')) {
-        const envVar = configKey.match(/\${env:([^}]+)}/)?.[1];
-        apiKey = process.env[envVar || ''];
-      } else if (configKey) {
-        apiKey = configKey;
+    if (this.secretStorage) {
+      const key = `devForge.${providerId}.apiKey`;
+      const stored = await this.secretStorage.get(key);
+      if (stored) {
+        return stored;
       }
     }
-    
-    return apiKey;
+
+    // Fallback to config
+    if (this.config) {
+      return this.config.get<string>(`apiProviders.${providerId}.apiKey`);
+    }
+
+    return undefined;
   }
 
   /**
    * Delete API key
    */
   async deleteApiKey(providerId: string): Promise<void> {
+    if (!this.secretStorage) {
+      return;
+    }
     const key = `devForge.${providerId}.apiKey`;
     await this.secretStorage.delete(key);
   }
@@ -57,8 +79,8 @@ export class ApiKeyManager {
    * Check if API key exists
    */
   async hasApiKey(providerId: string): Promise<boolean> {
-    const apiKey = await this.getApiKey(providerId);
-    return !!apiKey;
+    const key = await this.getApiKey(providerId);
+    return key !== undefined && key.length > 0;
   }
 }
 

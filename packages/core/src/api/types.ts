@@ -12,6 +12,30 @@ import { GenerateRequest, GenerateResponse, GenerateOptions, StreamChunk, Health
 export type ApiProviderType = 'openai' | 'anthropic' | 'cursor' | 'custom';
 
 /**
+ * Generate Options (re-exported from core types for API providers)
+ */
+export interface GenerateOptions {
+  temperature?: number;
+  topP?: number;
+  topK?: number;
+  maxTokens?: number;
+  seed?: number;
+  stop?: string[];
+  stream?: boolean;
+  [key: string]: any;
+}
+
+/**
+ * Health Status (re-exported from core types for API providers)
+ */
+export interface HealthStatus {
+  isHealthy: boolean;
+  message: string;
+  lastChecked?: Date;
+  details?: Record<string, any>;
+}
+
+/**
  * Rate Limit Configuration
  */
 export interface RateLimit {

@@ -4,7 +4,6 @@
  * Manages plugin lifecycle, discovery, loading, and execution.
  */
 
-import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 import { DevForgePlugin, PluginContext, PluginConfig, PluginManifest, ValidationResult } from './types';
@@ -15,6 +14,14 @@ import { PluginAPI } from './pluginAPI';
 import { ModelProviderRegistry } from '../providers/modelProviderRegistry';
 import { ApiProviderRegistry } from '../api/apiProviderRegistry';
 
+/**
+ * Configuration Interface for PluginManager
+ */
+export interface PluginManagerConfig {
+  pluginDirectory: string;
+  autoLoad?: boolean;
+}
+
 export class PluginManager {
   private plugins: Map<string, DevForgePlugin> = new Map();
   private sandbox: PluginSandbox;
@@ -23,14 +30,14 @@ export class PluginManager {
   private modelProviderRegistry: ModelProviderRegistry;
   private apiProviderRegistry: ApiProviderRegistry;
   private pluginDirectory: string;
-  private context: vscode.ExtensionContext;
+  private config: PluginManagerConfig;
 
   constructor(
-    context: vscode.ExtensionContext,
+    config: PluginManagerConfig,
     modelProviderRegistry: ModelProviderRegistry,
     apiProviderRegistry: ApiProviderRegistry
   ) {
-    this.context = context;
+    this.config = config;
     this.modelProviderRegistry = modelProviderRegistry;
     this.apiProviderRegistry = apiProviderRegistry;
     this.sandbox = new PluginSandbox();
@@ -38,9 +45,8 @@ export class PluginManager {
     this.validator = new PermissionValidator();
     
     // Get plugin directory from config
-    const config = vscode.workspace.getConfiguration('devForge');
     this.pluginDirectory = this.expandPath(
-      config.get<string>('plugins.pluginDirectory', '~/.dev-forge/plugins') || '~/.dev-forge/plugins'
+      config.pluginDirectory || '~/.dev-forge/plugins'
     );
   }
 
