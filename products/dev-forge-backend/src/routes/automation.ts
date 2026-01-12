@@ -9,6 +9,8 @@ import { authenticate, requireRole, AuthRequest } from '../middleware/auth';
 import { systemHealthMonitoringService } from '../services/systemHealthMonitoringService';
 import { performanceOptimizationService } from '../services/performanceOptimizationService';
 import { securityAutomationService } from '../services/securityAutomationService';
+import { securityAuditService } from '../services/securityAuditService';
+import { userAcceptanceTestingService } from '../services/userAcceptanceTestingService';
 import { logger } from '../utils/logger';
 import { z } from 'zod';
 
@@ -262,6 +264,176 @@ router.get('/security/findings', authenticate, requireRole('admin'), async (req:
   } catch (error: any) {
     logger.error('Error getting security findings:', error);
     res.status(500).json({ message: error.message || 'Failed to get security findings' });
+  }
+});
+
+/**
+ * @route POST /api/automation/performance/report
+ * @desc Generate performance report
+ * @access Private (Admin)
+ */
+router.post('/performance/report', authenticate, requireRole('admin'), async (req: AuthRequest, res: Response) => {
+  try {
+    const { startDate, endDate } = req.query;
+
+    if (!startDate || !endDate) {
+      return res.status(400).json({ message: 'startDate and endDate are required' });
+    }
+
+    const report = await performanceOptimizationService.generatePerformanceReport(
+      new Date(startDate as string),
+      new Date(endDate as string)
+    );
+
+    res.status(200).json(report);
+  } catch (error: any) {
+    logger.error('Error generating performance report:', error);
+    res.status(500).json({ message: error.message || 'Failed to generate performance report' });
+  }
+});
+
+/**
+ * @route POST /api/automation/security/audit
+ * @desc Perform comprehensive security audit
+ * @access Private (Admin)
+ */
+router.post('/security/audit', authenticate, requireRole('admin'), async (req: AuthRequest, res: Response) => {
+  try {
+    const { auditType, scope } = req.body;
+
+    const audit = await securityAuditService.performSecurityAudit(
+      auditType || 'full',
+      scope || ['all']
+    );
+
+    res.status(200).json(audit);
+  } catch (error: any) {
+    logger.error('Error performing security audit:', error);
+    res.status(500).json({ message: error.message || 'Failed to perform security audit' });
+  }
+});
+
+/**
+ * @route GET /api/automation/security/audit/:auditId
+ * @desc Get security audit report
+ * @access Private (Admin)
+ */
+router.get('/security/audit/:auditId', authenticate, requireRole('admin'), async (req: AuthRequest, res: Response) => {
+  try {
+    const { auditId } = req.params;
+    const report = await securityAuditService.getAuditReport(auditId);
+
+    if (!report) {
+      return res.status(404).json({ message: 'Audit report not found' });
+    }
+
+    res.status(200).json(report);
+  } catch (error: any) {
+    logger.error('Error getting security audit report:', error);
+    res.status(500).json({ message: error.message || 'Failed to get audit report' });
+  }
+});
+
+/**
+ * @route POST /api/automation/uat/plans
+ * @desc Create UAT test plan
+ * @access Private (Admin)
+ */
+router.post('/uat/plans', authenticate, requireRole('admin'), async (req: AuthRequest, res: Response) => {
+  try {
+    const { name, description, scenarios } = req.body;
+
+    if (!name || !description) {
+      return res.status(400).json({ message: 'name and description are required' });
+    }
+
+    const plan = await userAcceptanceTestingService.createTestPlan(
+      name,
+      description,
+      scenarios || [],
+      req.user!.id
+    );
+
+    res.status(201).json(plan);
+  } catch (error: any) {
+    logger.error('Error creating UAT test plan:', error);
+    res.status(500).json({ message: error.message || 'Failed to create test plan' });
+  }
+});
+
+/**
+ * @route GET /api/automation/uat/plans
+ * @desc Get all UAT test plans
+ * @access Private (Admin)
+ */
+router.get('/uat/plans', authenticate, requireRole('admin'), async (req: AuthRequest, res: Response) => {
+  try {
+    const plans = await userAcceptanceTestingService.getAllTestPlans();
+    res.status(200).json(plans);
+  } catch (error: any) {
+    logger.error('Error getting UAT test plans:', error);
+    res.status(500).json({ message: error.message || 'Failed to get test plans' });
+  }
+});
+
+/**
+ * @route GET /api/automation/uat/plans/:planId
+ * @desc Get UAT test plan
+ * @access Private (Admin)
+ */
+router.get('/uat/plans/:planId', authenticate, requireRole('admin'), async (req: AuthRequest, res: Response) => {
+  try {
+    const { planId } = req.params;
+    const plan = await userAcceptanceTestingService.getTestPlan(planId);
+
+    if (!plan) {
+      return res.status(404).json({ message: 'Test plan not found' });
+    }
+
+    res.status(200).json(plan);
+  } catch (error: any) {
+    logger.error('Error getting UAT test plan:', error);
+    res.status(500).json({ message: error.message || 'Failed to get test plan' });
+  }
+});
+
+/**
+ * @route POST /api/automation/uat/plans/:planId/scenarios/:scenarioId/execute
+ * @desc Execute UAT scenario
+ * @access Private (Admin)
+ */
+router.post('/uat/plans/:planId/scenarios/:scenarioId/execute', authenticate, requireRole('admin'), async (req: AuthRequest, res: Response) => {
+  try {
+    const { planId, scenarioId } = req.params;
+    const { actualResults, notes } = req.body;
+
+    const scenario = await userAcceptanceTestingService.executeScenario(
+      planId,
+      scenarioId,
+      req.user!.id,
+      actualResults,
+      notes
+    );
+
+    res.status(200).json(scenario);
+  } catch (error: any) {
+    logger.error('Error executing UAT scenario:', error);
+    res.status(500).json({ message: error.message || 'Failed to execute scenario' });
+  }
+});
+
+/**
+ * @route POST /api/automation/uat/scenarios/default
+ * @desc Get default UAT scenarios
+ * @access Private (Admin)
+ */
+router.post('/uat/scenarios/default', authenticate, requireRole('admin'), async (req: AuthRequest, res: Response) => {
+  try {
+    const scenarios = await userAcceptanceTestingService.createDefaultScenarios();
+    res.status(200).json(scenarios);
+  } catch (error: any) {
+    logger.error('Error getting default scenarios:', error);
+    res.status(500).json({ message: error.message || 'Failed to get default scenarios' });
   }
 });
 
