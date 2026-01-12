@@ -15,8 +15,10 @@ import { PluginPanel } from './components/plugin-panel';
 import { FireTeamsPanel } from './components/fire-teams-panel';
 import { MultiagentView } from './components/multiagent-view';
 import { PromptPanel } from './components/prompt-panel';
+import { PersonaPanel } from './components/persona-panel';
 import { modelManager } from './model-manager';
 import { fireTeamsSystem } from './systems/fire-teams';
+import { personaSystem } from './systems/persona-system';
 import { MultiModelExecutor } from './services/multi-model-executor';
 import { SystemIntegration } from './services/system-integration';
 
@@ -74,6 +76,9 @@ async function initializeApp(): Promise<void> {
 
     // Initialize Fire Teams Panel
     await initializeFireTeamsPanel();
+
+    // Initialize Persona Panel
+    await initializePersonaPanel();
 
     // Initialize Multi-Model Executor
     initializeMultiModelExecutor();
@@ -285,6 +290,21 @@ async function initializeFireTeamsPanel(): Promise<void> {
   } catch (error) {
     console.error('[Renderer] Fire Teams Panel initialization error:', error);
     updateStatus('Fire Teams Panel error', 5000);
+  }
+}
+
+/**
+ * Initialize Persona Panel
+ */
+async function initializePersonaPanel(): Promise<void> {
+  try {
+    const personaPanel = new PersonaPanel('persona-panel-container', personaSystem);
+    personaPanel.render();
+    console.log('[Renderer] Persona Panel initialized');
+    updateStatus('Persona Panel ready', 2000);
+  } catch (error) {
+    console.error('[Renderer] Persona Panel initialization error:', error);
+    updateStatus('Persona Panel error', 5000);
   }
 }
 
