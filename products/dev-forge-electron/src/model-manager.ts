@@ -165,16 +165,20 @@ export class ModelManager {
     try {
       this.updateModelStatus(modelId, 'loading');
       
-      const response = await fetch(`${model.endpoint}/api/tags`);
-      if (!response.ok) {
-        throw new Error('Ollama not available');
+      // Import OllamaService dynamically to avoid circular dependencies
+      const { ollamaService } = await import('./services/ollama-service');
+      
+      const isAvailable = await ollamaService.isAvailable();
+      if (!isAvailable) {
+        this.updateModelStatus(modelId, 'unavailable');
+        return false;
       }
 
-      const data = await response.json();
+      const availableModels = await ollamaService.listModels();
       const modelName = model.name.toLowerCase().replace(/\s+/g, '');
-      const available = data.models?.some((m: any) => 
+      const available = availableModels.some(m => 
         m.name.toLowerCase().includes(modelName)
-      ) || false;
+      );
 
       this.updateModelStatus(modelId, available ? 'available' : 'unavailable');
       return available;

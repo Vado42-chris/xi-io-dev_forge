@@ -12,6 +12,7 @@ import { StatusManager } from './status-manager';
 import { AppConfigManager } from './app-config';
 import { ModelPanel } from './components/model-panel';
 import { modelManager } from './model-manager';
+import { MultiModelExecutor } from './services/multi-model-executor';
 
 // Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', async () => {
@@ -61,6 +62,9 @@ async function initializeApp(): Promise<void> {
 
     // Initialize Model Panel
     await initializeModelPanel();
+
+    // Initialize Multi-Model Executor
+    initializeMultiModelExecutor();
 
     // Set up sidebar tabs
     setupSidebarTabs();
@@ -202,6 +206,9 @@ let statusManager: StatusManager | null = null;
 // App config manager instance
 let appConfig: AppConfigManager | null = null;
 
+// Multi-model executor instance
+let multiModelExecutor: MultiModelExecutor | null = null;
+
 /**
  * Initialize status manager
  */
@@ -222,6 +229,14 @@ async function initializeModelPanel(): Promise<void> {
     console.error('[Renderer] Model Panel initialization error:', error);
     updateStatus('Model Panel error', 5000);
   }
+}
+
+/**
+ * Initialize Multi-Model Executor
+ */
+function initializeMultiModelExecutor(): void {
+  multiModelExecutor = new MultiModelExecutor(modelManager);
+  console.log('[Renderer] Multi-Model Executor initialized');
 }
 
 /**
