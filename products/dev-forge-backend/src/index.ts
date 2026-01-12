@@ -60,6 +60,7 @@ import extensionRegistryRoutes from './routes/extensionRegistry';
 import chatbotRoutes from './routes/chatbot';
 import forumRoutes from './routes/forum';
 import financialRoutes from './routes/financial';
+import analyticsRoutes from './routes/analytics';
 
 app.use('/api/auth', authRoutes);
 app.use('/api/payments', paymentRoutes);
@@ -70,6 +71,7 @@ app.use('/api/registry', extensionRegistryRoutes);
 app.use('/api/chatbot', chatbotRoutes);
 app.use('/api/forum', forumRoutes);
 app.use('/api/financial', financialRoutes);
+app.use('/api/analytics', analyticsRoutes);
 
 // 404 handler
 app.use((req, res) => {
