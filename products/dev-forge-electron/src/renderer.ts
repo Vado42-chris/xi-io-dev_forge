@@ -8,10 +8,14 @@
 import { initializeMonacoEditor, setEditor, openFileInEditor } from './monaco-setup';
 import { FileExplorer } from './file-explorer';
 import { applyBranding, removeMicrosoftBranding } from './branding';
+import { StatusManager } from './status-manager';
 
 // Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', async () => {
   console.log('[Renderer] Dev Forge starting...');
+
+  // Initialize status manager
+  initializeStatusManager();
 
   // Apply branding
   applyBranding();
@@ -112,12 +116,13 @@ async function initializeEditor(): Promise<void> {
     (window as any).__devForgeEditor = editor;
 
     console.log('[Renderer] Monaco Editor initialized');
+    updateStatus('Monaco Editor ready', 2000);
 
     // Add editor event listeners
     if (editor && typeof editor.onDidChangeModelContent === 'function') {
       editor.onDidChangeModelContent(() => {
         // Handle content changes
-        updateStatus('Modified');
+        updateStatus('Modified', 2000);
       });
     }
 
@@ -136,8 +141,10 @@ async function initializeFileExplorer(): Promise<void> {
     const homePath = await window.electronAPI.getPath('home');
     const explorer = new FileExplorer('file-explorer-container', homePath);
     console.log('[Renderer] File Explorer initialized');
+    updateStatus('File Explorer ready', 2000);
   } catch (error) {
     console.error('[Renderer] File Explorer initialization error:', error);
+    updateStatus('File Explorer error', 5000);
   }
 }
 
@@ -151,7 +158,10 @@ function setupFileOpening(): void {
     
     if (editor) {
       await openFileInEditor(editor, path, content);
-      updateStatus(`Opened: ${path.split('/').pop()}`);
+      const fileName = path.split('/').pop() || path;
+      updateStatus(`Opened: ${fileName}`, 3000);
+    } else {
+      updateStatus('Editor not ready', 3000);
     }
   });
 }
@@ -165,12 +175,27 @@ function getEditor(): any {
   return (window as any).__devForgeEditor;
 }
 
+// Status manager instance
+let statusManager: StatusManager | null = null;
+
+/**
+ * Initialize status manager
+ */
+function initializeStatusManager(): void {
+  statusManager = new StatusManager();
+}
+
 /**
  * Update status bar
  */
-function updateStatus(message: string): void {
-  const statusBar = document.querySelector('.status-bar');
-  if (statusBar) {
-    statusBar.textContent = message;
+function updateStatus(message: string, duration?: number): void {
+  if (statusManager) {
+    statusManager.update(message, duration);
+  } else {
+    // Fallback
+    const statusBar = document.querySelector('.status-bar');
+    if (statusBar) {
+      statusBar.textContent = message;
+    }
   }
 }

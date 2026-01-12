@@ -109,9 +109,61 @@ export class FileExplorer {
   /**
    * Toggle directory node
    */
-  private toggleNode(node: FileNode, element: HTMLElement): void {
-    // Implementation for expanding/collapsing directories
-    // Will be enhanced when we add directory detection
+  private async toggleNode(node: FileNode, element: HTMLElement): Promise<void> {
+    if (node.type !== 'directory') return;
+
+    node.expanded = !node.expanded;
+    
+    // Update icon
+    const icon = element.querySelector('.file-tree-icon');
+    if (icon) {
+      icon.textContent = node.expanded ? '📂' : '📁';
+    }
+
+    if (node.expanded) {
+      // Load children if not already loaded
+      if (!node.children || node.children.length === 0) {
+        try {
+          const entries = await window.electronAPI.readDir(node.path);
+          node.children = entries.map(entry => {
+            const entryPath = `${node.path}/${entry}`;
+            const isDirectory = !entry.includes('.') || entry.endsWith('/');
+            return {
+              name: entry,
+              path: entryPath,
+              type: isDirectory ? 'directory' : 'file' as 'file' | 'directory',
+              expanded: false
+            };
+          });
+
+          // Render children
+          const childrenContainer = document.createElement('div');
+          childrenContainer.className = 'file-tree-children';
+          childrenContainer.style.marginLeft = '16px';
+          
+          for (const child of node.children) {
+            this.renderNode(child, childrenContainer);
+            this.nodes.set(child.path, child);
+          }
+
+          element.appendChild(childrenContainer);
+        } catch (error) {
+          console.error('[FileExplorer] Error loading directory:', error);
+        }
+      } else {
+        // Show existing children
+        const childrenContainer = element.querySelector('.file-tree-children') as HTMLElement;
+        if (childrenContainer) {
+          childrenContainer.style.display = 'block';
+        }
+      }
+    } else {
+      // Hide children
+      const childrenContainer = element.querySelector('.file-tree-children') as HTMLElement;
+      if (childrenContainer) {
+        childrenContainer.style.display = 'none';
+      }
+    }
   }
 
   /**
