@@ -1,0 +1,243 @@
+/**
+ * Workspace Panel Styles
+ * 
+ * Styling for the workspace panel using Xibalba Framework.
+ */
+
+.workspace-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--xibalba-surface, #1e1e1e);
+  border-right: 1px solid var(--xibalba-border, #2d2d2d);
+}
+
+.workspace-panel.hidden {
+  display: none;
+}
+
+.workspace-panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--spacing-md, 16px);
+  border-bottom: 1px solid var(--xibalba-border, #2d2d2d);
+  background: var(--xibalba-secondary, #2d2d2d);
+}
+
+.workspace-panel-title {
+  font-family: var(--font-tall-thin, 'Antonio', sans-serif);
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--xibalba-text-primary, #FFFFFF);
+}
+
+.workspace-panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-md, 16px);
+}
+
+.workspace-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md, 16px);
+}
+
+.workspace-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--spacing-xl, 32px);
+  text-align: center;
+  color: var(--xibalba-text-secondary, #CCCCCC);
+}
+
+.workspace-empty.hidden {
+  display: none;
+}
+
+.workspace-empty p {
+  margin-bottom: var(--spacing-md, 16px);
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 14px;
+}
+
+.workspace-card {
+  background: var(--xibalba-surface, #1e1e1e);
+  border: 1px solid var(--xibalba-border, #2d2d2d);
+  padding: var(--spacing-md, 16px);
+  transition: all 0.2s ease;
+}
+
+.workspace-card:hover {
+  border-color: var(--xibalba-primary, #007acc);
+  box-shadow: 0 2px 8px rgba(0, 122, 204, 0.2);
+}
+
+.workspace-card.active {
+  border-color: var(--xibalba-primary, #007acc);
+  background: rgba(0, 122, 204, 0.1);
+}
+
+.workspace-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-sm, 8px);
+}
+
+.workspace-card-title {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm, 8px);
+  flex: 1;
+}
+
+.workspace-icon {
+  font-size: 18px;
+}
+
+.workspace-name {
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--xibalba-text-primary, #FFFFFF);
+}
+
+.workspace-active-badge {
+  font-family: var(--font-tech, 'JetBrains Mono', monospace);
+  font-size: 10px;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  background: var(--xibalba-primary, #007acc);
+  color: var(--xibalba-text-primary, #FFFFFF);
+  border-radius: var(--border-radius, 4px);
+}
+
+.workspace-card-actions {
+  display: flex;
+  gap: var(--spacing-xs, 4px);
+}
+
+.workspace-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm, 8px);
+}
+
+.workspace-path {
+  font-family: var(--font-tech, 'JetBrains Mono', monospace);
+  font-size: 11px;
+  color: var(--xibalba-text-secondary, #CCCCCC);
+  opacity: 0.7;
+  word-break: break-all;
+}
+
+.workspace-projects {
+  margin-top: var(--spacing-sm, 8px);
+}
+
+.workspace-projects-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--spacing-xs, 4px);
+}
+
+.workspace-projects-title {
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--xibalba-text-secondary, #CCCCCC);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.workspace-projects-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs, 4px);
+  margin-left: var(--spacing-md, 16px);
+}
+
+.workspace-no-projects {
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 12px;
+  color: var(--xibalba-text-secondary, #CCCCCC);
+  opacity: 0.6;
+  font-style: italic;
+  margin-left: var(--spacing-md, 16px);
+}
+
+.workspace-project-item {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm, 8px);
+  padding: var(--spacing-xs, 4px) var(--spacing-sm, 8px);
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.workspace-project-item:hover {
+  background: var(--xibalba-secondary, #2d2d2d);
+  border-color: var(--xibalba-border, #2d2d2d);
+}
+
+.workspace-project-icon {
+  font-size: 14px;
+}
+
+.workspace-project-name {
+  font-family: var(--font-body, 'Inter', sans-serif);
+  font-size: 13px;
+  color: var(--xibalba-text-primary, #FFFFFF);
+  flex: 1;
+}
+
+.workspace-project-type {
+  font-family: var(--font-tech, 'JetBrains Mono', monospace);
+  font-size: 10px;
+  color: var(--xibalba-text-secondary, #CCCCCC);
+  text-transform: uppercase;
+  padding: 2px 6px;
+  background: var(--xibalba-secondary, #2d2d2d);
+  border-radius: var(--border-radius, 4px);
+}
+
+.workspace-meta {
+  display: flex;
+  gap: var(--spacing-md, 16px);
+  margin-top: var(--spacing-sm, 8px);
+  padding-top: var(--spacing-sm, 8px);
+  border-top: 1px solid var(--xibalba-border, #2d2d2d);
+}
+
+.workspace-meta-item {
+  font-family: var(--font-tech, 'JetBrains Mono', monospace);
+  font-size: 10px;
+  color: var(--xibalba-text-secondary, #CCCCCC);
+  opacity: 0.6;
+}
+
+/* Scrollbar styling */
+.workspace-panel-body::-webkit-scrollbar {
+  width: 6px;
+}
+
+.workspace-panel-body::-webkit-scrollbar-track {
+  background: var(--xibalba-surface, #1e1e1e);
+}
+
+.workspace-panel-body::-webkit-scrollbar-thumb {
+  background: var(--xibalba-border, #2d2d2d);
+  border-radius: 3px;
+}
+
+.workspace-panel-body::-webkit-scrollbar-thumb:hover {
+  background: var(--xibalba-primary, #007acc);
+}
+
