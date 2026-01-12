@@ -5,8 +5,8 @@
  */
 
 import * as vscode from 'vscode';
-import { ModelProviderRegistry } from '../../../src/services/providers/modelProviderRegistry';
-import { PluginManager } from '../../../src/services/plugins/pluginManager';
+import { ModelProviderRegistry } from '../services/providers/modelProviderRegistry';
+import { PluginManager } from '../services/plugins/pluginManager';
 
 export class ModelsTreeDataProvider implements vscode.TreeDataProvider<ModelTreeItem> {
   private _onDidChangeTreeData: vscode.EventEmitter<ModelTreeItem | undefined | null | void> = new vscode.EventEmitter<ModelTreeItem | undefined | null | void>();

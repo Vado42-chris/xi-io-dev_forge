@@ -5,8 +5,8 @@
  */
 
 import * as vscode from 'vscode';
-import { ModelProviderRegistry } from '../../../src/services/providers/modelProviderRegistry';
-import { ModelMetadata } from '../../../src/services/types';
+import { ModelProviderRegistry } from '../services/providers/modelProviderRegistry';
+import { ModelMetadata } from '../services/types';
 
 export class ModelSelectorPanel {
   private static currentPanel: ModelSelectorPanel | undefined;

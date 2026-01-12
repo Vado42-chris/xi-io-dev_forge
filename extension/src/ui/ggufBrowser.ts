@@ -5,7 +5,7 @@
  */
 
 import * as vscode from 'vscode';
-import { GGUFProvider } from '../../../src/services/providers/ggufProvider';
+import { GGUFProvider } from '../services/providers/ggufProvider';
 
 export class GGUFBrowserPanel {
   private static currentPanel: GGUFBrowserPanel | undefined;
