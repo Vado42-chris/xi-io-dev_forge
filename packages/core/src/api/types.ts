@@ -4,7 +4,10 @@
  * Defines interfaces for API providers, requests, and responses.
  */
 
-import { GenerateRequest, GenerateResponse, GenerateOptions, StreamChunk, HealthStatus } from '../types';
+import { GenerateRequest, GenerateResponse, StreamChunk } from '../types';
+
+// Re-export types that are shared but defined in core types
+export type { GenerateOptions, HealthStatus } from '../types';
 
 /**
  * API Provider Types

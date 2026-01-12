@@ -1,10 +1,9 @@
 /**
- * Plugin System Type Definitions
+ * Plugin Type Definitions
  * 
- * Defines interfaces for plugins, permissions, and plugin API.
+ * Framework-agnostic plugin system types.
  */
 
-import * as vscode from 'vscode';
 import { ModelProvider } from '../types';
 import { ApiProvider } from '../api/types';
 
@@ -12,23 +11,11 @@ import { ApiProvider } from '../api/types';
  * Plugin Permissions
  */
 export interface PluginPermissions {
-  // File System
-  readFiles?: string[];        // Allowed file paths (glob patterns)
-  writeFiles?: string[];       // Allowed file paths (glob patterns)
-  executeFiles?: string[];     // Allowed executable paths
-  
-  // Network
-  networkAccess?: boolean;      // Allow network access
-  allowedDomains?: string[];    // Allowed domains
-  
-  // System
-  systemCommands?: boolean;     // Allow system commands
-  environmentVariables?: string[]; // Allowed env vars
-  
-  // Dev Forge
-  modelAccess?: string[];       // Allowed model IDs
-  apiAccess?: string[];         // Allowed API provider IDs
-  commandExecution?: boolean;   // Allow command execution
+  model?: string[];      // Allowed model IDs or ['*'] for all
+  api?: string[];        // Allowed API provider IDs or ['*'] for all
+  command?: string[];    // Allowed command IDs or ['*'] for all
+  fileSystem?: string[]; // Allowed file paths (glob patterns)
+  network?: boolean;     // Network access permission
 }
 
 /**
@@ -38,55 +25,82 @@ export interface PluginManifest {
   id: string;
   name: string;
   version: string;
-  apiVersion: string;
-  author?: string;
   description?: string;
+  author?: string;
   license?: string;
-  main: string;
-  permissions?: PluginPermissions;
-  contributes?: {
-    commands?: Array<{
-      command: string;
-      title: string;
-    }>;
-    webviews?: Array<{
-      id: string;
-      title: string;
-    }>;
-    treeViews?: Array<{
-      id: string;
-      title: string;
-    }>;
-  };
-}
-
-/**
- * Plugin Context
- */
-export interface PluginContext {
-  // VS Code API
-  vscode: typeof vscode;
-  
-  // Dev Forge API
-  devForge: DevForgePluginAPI;
-  
-  // Plugin Info
-  pluginPath: string;
-  pluginConfig: PluginConfig;
+  permissions: PluginPermissions;
+  entryPoint: string;
+  dependencies?: Record<string, string>;
 }
 
 /**
  * Plugin Configuration
  */
 export interface PluginConfig {
-  id: string;
   enabled: boolean;
-  permissions?: PluginPermissions;
-  [key: string]: any;
+  permissions?: Partial<PluginPermissions>;
+}
+
+/**
+ * Plugin Context
+ */
+export interface PluginContext {
+  pluginId: string;
+  pluginPath: string;
+  api: DevForgePluginAPI;
+  config: PluginConfig;
+}
+
+/**
+ * Command Definition
+ */
+export interface Command {
+  id: string;
+  title: string;
+  handler: (...args: any[]) => Promise<any> | any;
+}
+
+/**
+ * Webview Configuration (framework-agnostic)
+ */
+export interface WebviewConfig {
+  id: string;
+  title: string;
+  html?: string;
+  onMessage?: (message: any) => void;
+}
+
+/**
+ * Tree View Configuration (framework-agnostic)
+ */
+export interface TreeViewConfig {
+  id: string;
+  dataProvider: any; // Framework-specific data provider
+}
+
+/**
+ * Webview Interface (framework-agnostic)
+ */
+export interface Webview {
+  id: string;
+  postMessage(message: any): void;
+  onMessage(callback: (message: any) => void): void;
+  dispose(): void;
+}
+
+/**
+ * Tree View Interface (framework-agnostic)
+ */
+export interface TreeView {
+  id: string;
+  refresh(): void;
+  dispose(): void;
 }
 
 /**
  * Dev Forge Plugin API
+ * 
+ * Framework-agnostic API exposed to plugins.
  */
 export interface DevForgePluginAPI {
   // Model Management
@@ -110,7 +124,7 @@ export interface DevForgePluginAPI {
     execute(commandId: string, ...args: any[]): Promise<any>;
   };
   
-  // UI
+  // UI (framework-agnostic)
   ui: {
     createWebview(config: WebviewConfig): Webview;
     createTreeView(config: TreeViewConfig): TreeView;
@@ -138,95 +152,22 @@ export interface DevForgePluginAPI {
 }
 
 /**
- * Plugin Interface
+ * Dev Forge Plugin
  */
 export interface DevForgePlugin {
-  // Metadata
   id: string;
   name: string;
   version: string;
-  apiVersion: string;
-  author?: string;
-  description?: string;
-  license?: string;
-  
-  // Manifest
-  manifest: PluginManifest;
-  
-  // Lifecycle
+  api: DevForgePluginAPI;
   activate(context: PluginContext): Promise<void>;
   deactivate?(): Promise<void>;
-  
-  // Model Provider Registration
-  registerModelProvider?(provider: ModelProvider): void;
-  
-  // API Provider Registration
-  registerApiProvider?(provider: ApiProvider): void;
-  
-  // Command Registration
-  registerCommands?(commands: Command[]): void;
-  
-  // UI Registration
-  registerWebviews?(webviews: WebviewConfig[]): void;
-  registerTreeViews?(treeViews: TreeViewConfig[]): void;
-  
-  // Event Handlers
-  onModelExecution?(event: any): void;
-  onTaskComplete?(event: any): void;
 }
 
 /**
- * Command Interface
- */
-export interface Command {
-  id: string;
-  title: string;
-  handler: (...args: any[]) => Promise<any> | any;
-}
-
-/**
- * Webview Configuration
- */
-export interface WebviewConfig {
-  id: string;
-  title: string;
-  html?: string;
-  script?: string;
-}
-
-/**
- * Tree View Configuration
- */
-export interface TreeViewConfig {
-  id: string;
-  title: string;
-  dataProvider: any;
-}
-
-/**
- * Webview Interface
- */
-export interface Webview {
-  id: string;
-  postMessage(message: any): void;
-  dispose(): void;
-}
-
-/**
- * Tree View Interface
- */
-export interface TreeView {
-  id: string;
-  refresh(): void;
-  dispose(): void;
-}
-
-/**
- * Validation Result
+ * Plugin Validation Result
  */
 export interface ValidationResult {
-  isValid: boolean;
+  valid: boolean;
   errors: string[];
   warnings: string[];
 }
-

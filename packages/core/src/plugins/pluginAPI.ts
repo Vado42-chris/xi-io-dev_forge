@@ -1,40 +1,60 @@
 /**
  * Plugin API
  * 
- * API surface exposed to plugins.
+ * Framework-agnostic API surface exposed to plugins.
  */
 
-import * as vscode from 'vscode';
 import { ModelProvider } from '../types';
 import { ApiProvider } from '../api/types';
-import { DevForgePluginAPI, Command, WebviewConfig, TreeViewConfig, PluginPermissions } from './types';
+import { DevForgePluginAPI, Command, WebviewConfig, TreeViewConfig, PluginPermissions, Webview, TreeView } from './types';
 import { PermissionValidator } from './permissionValidator';
 import { ModelProviderRegistry } from '../providers/modelProviderRegistry';
 import { ApiProviderRegistry } from '../api/apiProviderRegistry';
 
+/**
+ * UI Adapter Interface
+ * Allows framework-specific UI implementations
+ */
+export interface UIAdapter {
+  createWebview(config: WebviewConfig): Webview;
+  createTreeView(config: TreeViewConfig): TreeView;
+}
+
+/**
+ * Config Adapter Interface
+ * Allows framework-specific configuration access
+ */
+export interface ConfigAdapter {
+  get<T>(key: string): T | undefined;
+  update(key: string, value: any): Promise<void>;
+}
+
 export class PluginAPI implements DevForgePluginAPI {
-  private vscodeAPI: typeof vscode;
   private permissionValidator: PermissionValidator;
   private modelProviderRegistry: ModelProviderRegistry;
   private apiProviderRegistry: ApiProviderRegistry;
   private permissions: PluginPermissions;
   private registeredCommands: Map<string, Command> = new Map();
-  private webviews: Map<string, any> = new Map();
-  private treeViews: Map<string, any> = new Map();
+  private webviews: Map<string, Webview> = new Map();
+  private treeViews: Map<string, TreeView> = new Map();
   private eventHandlers: Map<string, Function[]> = new Map();
+  private uiAdapter?: UIAdapter;
+  private configAdapter?: ConfigAdapter;
 
   constructor(
-    vscodeAPI: typeof vscode,
     permissionValidator: PermissionValidator,
     modelProviderRegistry: ModelProviderRegistry,
     apiProviderRegistry: ApiProviderRegistry,
-    permissions: PluginPermissions
+    permissions: PluginPermissions,
+    uiAdapter?: UIAdapter,
+    configAdapter?: ConfigAdapter
   ) {
-    this.vscodeAPI = vscodeAPI;
     this.permissionValidator = permissionValidator;
     this.modelProviderRegistry = modelProviderRegistry;
     this.apiProviderRegistry = apiProviderRegistry;
     this.permissions = permissions;
+    this.uiAdapter = uiAdapter;
+    this.configAdapter = configAdapter;
   }
 
   /**
@@ -76,9 +96,7 @@ export class PluginAPI implements DevForgePluginAPI {
       if (!this.permissionValidator.validate(this.permissions, 'api', provider.id)) {
         throw new Error(`Permission denied: Cannot register API provider ${provider.id}`);
       }
-      // Note: ApiProviderRegistry registration would go here
-      // For now, we'll log it
-      console.log(`[PluginAPI] Registering API provider: ${provider.id}`);
+      this.apiProviderRegistry.registerProvider({ id: provider.id, name: provider.name, type: provider.type, baseUrl: '', enabled: true }, provider.id);
     },
 
     getProvider: (id: string) => {
@@ -99,9 +117,6 @@ export class PluginAPI implements DevForgePluginAPI {
         throw new Error(`Permission denied: Cannot register command ${command.id}`);
       }
       this.registeredCommands.set(command.id, command);
-      
-      // Register with VS Code
-      this.vscodeAPI.commands.registerCommand(command.id, command.handler);
     },
 
     execute: async (commandId: string, ...args: any[]) => {
@@ -114,31 +129,23 @@ export class PluginAPI implements DevForgePluginAPI {
   };
 
   /**
-   * UI API
+   * UI API (framework-agnostic)
    */
   ui = {
-    createWebview: (config: WebviewConfig) => {
-      const panel = this.vscodeAPI.window.createWebviewPanel(
-        config.id,
-        config.title,
-        this.vscodeAPI.ViewColumn.One,
-        {
-          enableScripts: true
-        }
-      );
-
-      if (config.html) {
-        panel.webview.html = config.html;
+    createWebview: (config: WebviewConfig): Webview => {
+      if (!this.uiAdapter) {
+        throw new Error('UI adapter not configured. Cannot create webview.');
       }
-
-      this.webviews.set(config.id, panel);
-      return panel;
+      const webview = this.uiAdapter.createWebview(config);
+      this.webviews.set(config.id, webview);
+      return webview;
     },
 
-    createTreeView: (config: TreeViewConfig) => {
-      const treeView = this.vscodeAPI.window.createTreeView(config.id, {
-        treeDataProvider: config.dataProvider
-      });
+    createTreeView: (config: TreeViewConfig): TreeView => {
+      if (!this.uiAdapter) {
+        throw new Error('UI adapter not configured. Cannot create tree view.');
+      }
+      const treeView = this.uiAdapter.createTreeView(config);
       this.treeViews.set(config.id, treeView);
       return treeView;
     }
@@ -149,13 +156,17 @@ export class PluginAPI implements DevForgePluginAPI {
    */
   config = {
     get: <T>(key: string): T | undefined => {
-      const config = this.vscodeAPI.workspace.getConfiguration('devForge');
-      return config.get<T>(key);
+      if (!this.configAdapter) {
+        return undefined;
+      }
+      return this.configAdapter.get<T>(key);
     },
 
     update: async (key: string, value: any) => {
-      const config = this.vscodeAPI.workspace.getConfiguration('devForge');
-      await config.update(key, value, this.vscodeAPI.ConfigurationTarget.Global);
+      if (!this.configAdapter) {
+        throw new Error('Config adapter not configured. Cannot update configuration.');
+      }
+      await this.configAdapter.update(key, value);
     }
   };
 
@@ -205,4 +216,3 @@ export class PluginAPI implements DevForgePluginAPI {
     }
   };
 }
-
