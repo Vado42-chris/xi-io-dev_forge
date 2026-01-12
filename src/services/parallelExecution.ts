@@ -142,42 +142,24 @@ export class ParallelExecutionService {
     const timeout = request.timeout || this.defaultTimeout;
 
     try {
-      const ollamaRequest: OllamaRequest = {
-        model: model.name,
-        prompt: request.prompt,
-        options: request.options,
-      };
-
-      // Execute with timeout - use AbortController for proper cancellation
-      const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), timeout);
-
-      try {
-        // Note: ollamaService.generate doesn't support AbortSignal yet
-        // This is a placeholder for future enhancement
-        const response = await Promise.race([
-          ollamaService.generate(ollamaRequest),
-          this.createTimeout(timeout),
-        ]) as OllamaResponse;
-
-        clearTimeout(timeoutId);
+      // Use modelManager to generate (which uses provider system)
+      const response = await Promise.race([
+        modelManager.generate(model.id, request.prompt, request.options),
+        this.createTimeout(timeout),
+      ]);
 
       const latency = Date.now() - startTime;
 
       const result: ModelResult = {
         modelId: model.id,
         modelName: model.displayName,
-        response: response.response,
+        response: response,
         success: true,
         latency,
         timestamp: new Date(),
       };
 
-        return result;
-      } catch (raceError) {
-        clearTimeout(timeoutId);
-        throw raceError;
-      }
+      return result;
     } catch (error) {
       const latency = Date.now() - startTime;
 
