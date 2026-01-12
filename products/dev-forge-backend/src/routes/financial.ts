@@ -5,7 +5,7 @@
  */
 
 import { Router, Request, Response } from 'express';
-import { authenticate, authorize, AuthRequest } from '../middleware/auth';
+import { authenticate, requireRole, AuthRequest } from '../middleware/auth';
 import { revenueSharingService } from '../services/revenueSharingService';
 import { payoutAutomationService } from '../services/payoutAutomationService';
 import { taxReportingService } from '../services/taxReportingService';
@@ -89,7 +89,7 @@ router.get('/payout-summary', authenticate, async (req: AuthRequest, res: Respon
  * @desc Record revenue share (Admin/System only)
  * @access Private (Admin)
  */
-router.post('/revenue-shares', authenticate, authorize(['admin']), async (req: AuthRequest, res: Response) => {
+router.post('/revenue-shares', authenticate, requireRole('admin'), async (req: AuthRequest, res: Response) => {
   try {
     const validatedBody = recordRevenueShareSchema.parse(req.body);
     
@@ -118,7 +118,7 @@ router.post('/revenue-shares', authenticate, authorize(['admin']), async (req: A
  * @desc Process automatic payouts (Admin/System only)
  * @access Private (Admin)
  */
-router.post('/payouts/process', authenticate, authorize(['admin']), async (req: AuthRequest, res: Response) => {
+router.post('/payouts/process', authenticate, requireRole('admin'), async (req: AuthRequest, res: Response) => {
   try {
     const schedule = req.body.schedule || {
       frequency: 'monthly',
@@ -198,7 +198,7 @@ router.post('/tax-form', authenticate, async (req: AuthRequest, res: Response) =
  * @desc Get financial report (Admin only)
  * @access Private (Admin)
  */
-router.get('/report', authenticate, authorize(['admin']), async (req: AuthRequest, res: Response) => {
+router.get('/report', authenticate, requireRole('admin'), async (req: AuthRequest, res: Response) => {
   try {
     const { startDate, endDate } = req.query;
 
@@ -256,7 +256,7 @@ router.get('/developer-summary/:developerId?', authenticate, async (req: AuthReq
  * @desc Get revenue trends (Admin only)
  * @access Private (Admin)
  */
-router.get('/revenue-trends', authenticate, authorize(['admin']), async (req: AuthRequest, res: Response) => {
+router.get('/revenue-trends', authenticate, requireRole('admin'), async (req: AuthRequest, res: Response) => {
   try {
     const { startDate, endDate, granularity } = req.query;
 
