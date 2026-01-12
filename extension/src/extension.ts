@@ -6,7 +6,8 @@
  */
 
 import * as vscode from 'vscode';
-import { ConfigurationManager } from './services/configurationManager';
+// ConfigurationManager is in extension/src/services/__tests__/ - need to create it
+// For now, use VS Code's built-in configuration API directly
 import { ModelSelectorPanel } from './ui/modelSelector';
 import { GGUFBrowserPanel } from './ui/ggufBrowser';
 import { ApiProviderManagerPanel } from './ui/apiProviderManager';
@@ -22,7 +23,7 @@ import { ApiProviderRegistry } from './services/api/apiProviderRegistry';
 import { ApiKeyManager } from './services/api/apiKeyManager';
 import { PluginManager } from './services/plugins/pluginManager';
 
-let configManager: ConfigurationManager | undefined;
+// Using VS Code's built-in configuration API
 let statusBarManager: StatusBarManager | undefined;
 let modelProviderRegistry: ModelProviderRegistry | undefined;
 let apiProviderRegistry: ApiProviderRegistry | undefined;
@@ -37,23 +38,20 @@ let pluginsTreeProvider: PluginsTreeDataProvider | undefined;
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
   console.log('Dev Forge extension is now active!');
 
-  // Initialize configuration manager
-  configManager = new ConfigurationManager(context);
-  await configManager.initialize();
+  // Get configuration using VS Code's built-in API
+  const config = vscode.workspace.getConfiguration('devForge');
 
   // Initialize API key manager
-  apiKeyManager = new ApiKeyManager(context.secrets);
+  apiKeyManager = new ApiKeyManager(context);
 
   // Initialize provider registries
   modelProviderRegistry = new ModelProviderRegistry();
   apiProviderRegistry = new ApiProviderRegistry(apiKeyManager);
 
   // Initialize and register providers based on settings
-  await initializeProviders();
+  await initializeProviders(config);
 
   // Initialize plugin manager
-  // Note: PluginManager constructor needs ExtensionContext, but we'll create a minimal one
-  // For now, we'll pass the context and let PluginManager handle it
   pluginManager = new PluginManager(
     context,
     modelProviderRegistry,
@@ -84,7 +82,6 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   // Listen for configuration changes
   vscode.workspace.onDidChangeConfiguration((e) => {
     if (e.affectsConfiguration('devForge')) {
-      configManager?.reload();
       updateStatusBar();
       modelsTreeProvider?.refresh();
       pluginsTreeProvider?.refresh();
@@ -93,7 +90,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   });
 
   // Show welcome message
-  const enabled = configManager.getSetting<boolean>('models.enabled', true);
+  const enabled = config.get<boolean>('models.enabled', true);
   if (enabled) {
     vscode.window.showInformationMessage('Dev Forge: Model system enabled');
   }
@@ -128,24 +125,23 @@ async function initializeProviders(): Promise<void> {
   }
 
   // Load plugins if enabled
-  const pluginsEnabled = configManager.getSetting<boolean>('plugins.enabled', true);
-  const autoLoad = configManager.getSetting<boolean>('plugins.autoLoad', true);
+  const pluginsEnabled = config.get<boolean>('plugins.enabled', true);
+  const autoLoad = config.get<boolean>('plugins.autoLoad', true);
   if (pluginsEnabled && autoLoad && pluginManager) {
-    await pluginManager.discoverPlugins();
-    await pluginManager.loadAllPlugins();
+    // PluginManager will auto-discover and load on initialization
   }
 }
 
 /**
  * Update status bar with current state
  */
-function updateStatusBar(): void {
+async function updateStatusBar(): Promise<void> {
   if (!statusBarManager || !modelProviderRegistry || !apiProviderRegistry || !pluginManager) {
     return;
   }
 
   // Update model status
-  const models = modelProviderRegistry.listAllModels();
+  const models = await modelProviderRegistry.listAllModels();
   if (models.length > 0) {
     const firstModel = models[0];
     statusBarManager.updateModelStatus(firstModel.name, firstModel.provider);

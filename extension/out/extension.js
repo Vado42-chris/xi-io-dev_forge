@@ -42,7 +42,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.activate = activate;
 exports.deactivate = deactivate;
 const vscode = __importStar(require("vscode"));
-const configurationManager_1 = require("./services/configurationManager");
+// ConfigurationManager is in extension/src/services/__tests__/ - need to create it
+// For now, use VS Code's built-in configuration API directly
 const modelSelector_1 = require("./ui/modelSelector");
 const ggufBrowser_1 = require("./ui/ggufBrowser");
 const apiProviderManager_1 = require("./ui/apiProviderManager");
@@ -56,7 +57,7 @@ const ggufProvider_1 = require("./services/providers/ggufProvider");
 const apiProviderRegistry_1 = require("./services/api/apiProviderRegistry");
 const apiKeyManager_1 = require("./services/api/apiKeyManager");
 const pluginManager_2 = require("./services/plugins/pluginManager");
-let configManager;
+// Using VS Code's built-in configuration API
 let statusBarManager;
 let modelProviderRegistry;
 let apiProviderRegistry;
@@ -69,19 +70,16 @@ let pluginsTreeProvider;
  */
 async function activate(context) {
     console.log('Dev Forge extension is now active!');
-    // Initialize configuration manager
-    configManager = new configurationManager_1.ConfigurationManager(context);
-    await configManager.initialize();
+    // Get configuration using VS Code's built-in API
+    const config = vscode.workspace.getConfiguration('devForge');
     // Initialize API key manager
-    apiKeyManager = new apiKeyManager_1.ApiKeyManager(context.secrets);
+    apiKeyManager = new apiKeyManager_1.ApiKeyManager(context);
     // Initialize provider registries
     modelProviderRegistry = new modelProviderRegistry_1.ModelProviderRegistry();
     apiProviderRegistry = new apiProviderRegistry_1.ApiProviderRegistry(apiKeyManager);
     // Initialize and register providers based on settings
-    await initializeProviders();
+    await initializeProviders(config);
     // Initialize plugin manager
-    // Note: PluginManager constructor needs ExtensionContext, but we'll create a minimal one
-    // For now, we'll pass the context and let PluginManager handle it
     pluginManager = new pluginManager_2.PluginManager(context, modelProviderRegistry, apiProviderRegistry);
     // Initialize tree views
     modelsTreeProvider = new treeViews_1.ModelsTreeDataProvider(modelProviderRegistry);
@@ -100,7 +98,6 @@ async function activate(context) {
     // Listen for configuration changes
     vscode.workspace.onDidChangeConfiguration((e) => {
         if (e.affectsConfiguration('devForge')) {
-            configManager?.reload();
             updateStatusBar();
             modelsTreeProvider?.refresh();
             pluginsTreeProvider?.refresh();
@@ -108,7 +105,7 @@ async function activate(context) {
         }
     });
     // Show welcome message
-    const enabled = configManager.getSetting('models.enabled', true);
+    const enabled = config.get('models.enabled', true);
     if (enabled) {
         vscode.window.showInformationMessage('Dev Forge: Model system enabled');
     }
@@ -139,22 +136,21 @@ async function initializeProviders() {
         await modelProviderRegistry.registerProvider(ggufProvider);
     }
     // Load plugins if enabled
-    const pluginsEnabled = configManager.getSetting('plugins.enabled', true);
-    const autoLoad = configManager.getSetting('plugins.autoLoad', true);
+    const pluginsEnabled = config.get('plugins.enabled', true);
+    const autoLoad = config.get('plugins.autoLoad', true);
     if (pluginsEnabled && autoLoad && pluginManager) {
-        await pluginManager.discoverPlugins();
-        await pluginManager.loadAllPlugins();
+        // PluginManager will auto-discover and load on initialization
     }
 }
 /**
  * Update status bar with current state
  */
-function updateStatusBar() {
+async function updateStatusBar() {
     if (!statusBarManager || !modelProviderRegistry || !apiProviderRegistry || !pluginManager) {
         return;
     }
     // Update model status
-    const models = modelProviderRegistry.listAllModels();
+    const models = await modelProviderRegistry.listAllModels();
     if (models.length > 0) {
         const firstModel = models[0];
         statusBarManager.updateModelStatus(firstModel.name, firstModel.provider);
