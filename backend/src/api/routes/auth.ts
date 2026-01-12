@@ -6,6 +6,8 @@
 
 import { Router } from 'express';
 import { AuthService } from '../../services/auth/authService';
+import { validateBody } from '../middleware/validationMiddleware';
+import { registerSchema, loginSchema } from '../validators';
 
 const router = Router();
 const authService = new AuthService();
@@ -14,19 +16,9 @@ const authService = new AuthService();
  * POST /api/auth/register
  * Register a new user
  */
-router.post('/register', async (req, res) => {
+router.post('/register', validateBody(registerSchema), async (req, res) => {
   try {
     const { email, username, password, first_name, last_name } = req.body;
-
-    // Validation
-    if (!email || !username || !password) {
-      return res.status(400).json({
-        error: {
-          message: 'Email, username, and password are required',
-          status: 400
-        }
-      });
-    }
 
     // Register user
     const result = await authService.register({
@@ -66,19 +58,9 @@ router.post('/register', async (req, res) => {
  * POST /api/auth/login
  * Login user
  */
-router.post('/login', async (req, res) => {
+router.post('/login', validateBody(loginSchema), async (req, res) => {
   try {
     const { email, password } = req.body;
-
-    // Validation
-    if (!email || !password) {
-      return res.status(400).json({
-        error: {
-          message: 'Email and password are required',
-          status: 400
-        }
-      });
-    }
 
     // Login user
     const result = await authService.login({ email, password });
