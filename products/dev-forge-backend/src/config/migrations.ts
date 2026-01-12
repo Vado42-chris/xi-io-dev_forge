@@ -98,6 +98,7 @@ export async function runMigrations(): Promise<void> {
     const migrationFiles = [
       { id: '001', name: '001_initial_schema.sql' },
       { id: '002', name: '002_extension_registry.sql' },
+      { id: '003', name: '003_community_forum.sql' },
       // Add more migrations here as they are created
     ];
 
