@@ -13,7 +13,12 @@
     "AI"
   ],
   "activationEvents": [
-    "onStartupFinished"
+    "onStartupFinished",
+    "onCommand:devForge.settings.open",
+    "onCommand:devForge.models.select",
+    "onCommand:devForge.gguf.scan",
+    "onCommand:devForge.apiProviders.add",
+    "onCommand:devForge.plugins.manage"
   ],
   "main": "./out/extension.js",
   "contributes": {
