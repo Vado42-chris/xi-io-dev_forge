@@ -9,6 +9,7 @@ import { initializeMonacoEditor, setEditor, openFileInEditor } from './monaco-se
 import { FileExplorer } from './file-explorer';
 import { applyBranding, removeMicrosoftBranding } from './branding';
 import { StatusManager } from './status-manager';
+import { AppConfigManager } from './app-config';
 
 // Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', async () => {
@@ -63,16 +64,28 @@ async function initializeApp(): Promise<void> {
 }
 
 /**
+ * Initialize app configuration
+ */
+async function initializeAppConfig(): Promise<void> {
+  appConfig = new AppConfigManager();
+  await appConfig.load();
+  console.log('[Renderer] App configuration loaded');
+}
+
+/**
  * Load configuration
  */
 async function loadConfiguration(): Promise<void> {
   try {
-    // Load user preferences
-    const theme = await window.electronAPI.getConfig('ui.theme') || 'xibalba-dark';
-    console.log(`[Renderer] Theme: ${theme}`);
-
-    // Apply theme
-    document.body.setAttribute('data-theme', theme);
+    // Initialize app config
+    await initializeAppConfig();
+    
+    // Apply theme from config
+    if (appConfig) {
+      const theme = appConfig.getTheme();
+      document.body.setAttribute('data-theme', theme);
+      console.log(`[Renderer] Theme: ${theme}`);
+    }
 
   } catch (error) {
     console.error('[Renderer] Configuration load error:', error);
@@ -177,6 +190,9 @@ function getEditor(): any {
 
 // Status manager instance
 let statusManager: StatusManager | null = null;
+
+// App config manager instance
+let appConfig: AppConfigManager | null = null;
 
 /**
  * Initialize status manager
