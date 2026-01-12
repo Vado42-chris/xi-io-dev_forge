@@ -105,6 +105,7 @@ export async function runMigrations(): Promise<void> {
       { id: '007', name: '007_final_automation.sql' },
       { id: '008', name: '008_integration_validation.sql' },
       { id: '009', name: '009_week18_services.sql' },
+      { id: '010', name: '010_monitoring_dashboard.sql' },
       // Add more migrations here as they are created
     ];
 

@@ -64,6 +64,7 @@ import analyticsRoutes from './routes/analytics';
 import distributionRoutes from './routes/distribution';
 import automationRoutes from './routes/automation';
 import integrationRoutes from './routes/integration';
+import monitoringRoutes from './routes/monitoring';
 
 app.use('/api/auth', authRoutes);
 app.use('/api/payments', paymentRoutes);
@@ -78,6 +79,7 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/distribution', distributionRoutes);
 app.use('/api/automation', automationRoutes);
 app.use('/api/integration', integrationRoutes);
+app.use('/api/monitoring', monitoringRoutes);
 
 // 404 handler
 app.use((req, res) => {
