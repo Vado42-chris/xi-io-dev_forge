@@ -10,6 +10,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import { getDatabase } from './database/connection';
+import apiRoutes from './api/routes';
 
 // Load environment variables
 dotenv.config();
@@ -33,8 +34,8 @@ app.use(cors({
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Health check endpoint
-app.get('/health', (req, res) => {
+// Health check endpoint (root level)
+app.get('/health', (req: express.Request, res: express.Response) => {
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
@@ -43,18 +44,8 @@ app.get('/health', (req, res) => {
   });
 });
 
-// API routes (will be added)
-app.get('/api', (req, res) => {
-  res.json({
-    message: 'Dev Forge Backend API',
-    version: '0.1.0',
-    endpoints: {
-      health: '/health',
-      api: '/api',
-      // More endpoints will be added
-    }
-  });
-});
+// API routes
+app.use('/api', apiRoutes);
 
 // Error handling middleware
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
@@ -68,7 +59,7 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 });
 
 // 404 handler
-app.use((req, res) => {
+app.use((req: express.Request, res: express.Response) => {
   res.status(404).json({
     error: {
       message: 'Not found',
