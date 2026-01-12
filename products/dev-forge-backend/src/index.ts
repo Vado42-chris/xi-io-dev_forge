@@ -15,6 +15,8 @@ import { logger } from './utils/logger';
 import { errorHandler } from './middleware/errorHandler';
 import { rateLimiter } from './middleware/rateLimiter';
 import { requestLogger } from './middleware/requestLogger';
+import { securityHeaders, sanitizeInput } from './middleware/security';
+import { performanceMonitor } from './utils/performance';
 import { testConnection } from './config/database';
 import { runMigrations } from './config/migrations';
 
@@ -31,9 +33,12 @@ app.use(cors({
   origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
   credentials: true
 }));
+app.use(securityHeaders); // Additional security headers
+app.use(sanitizeInput); // Sanitize user input
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(requestLogger); // Log all requests
+app.use(performanceMonitor); // Monitor performance
 app.use(rateLimiter);
 
 // Health check
