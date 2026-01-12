@@ -110,7 +110,7 @@ export class PluginManager {
   async loadPlugin(manifest: PluginManifest, pluginConfig: PluginConfig): Promise<void> {
     // Validate plugin
     const validation = await this.validatePlugin(manifest);
-    if (!validation.isValid) {
+    if (!validation.valid) {
       throw new Error(`Plugin validation failed: ${validation.errors.join(', ')}`);
     }
 
