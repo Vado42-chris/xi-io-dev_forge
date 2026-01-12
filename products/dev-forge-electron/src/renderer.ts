@@ -11,6 +11,7 @@ import { applyBranding, removeMicrosoftBranding } from './branding';
 import { StatusManager } from './status-manager';
 import { AppConfigManager } from './app-config';
 import { ModelPanel } from './components/model-panel';
+import { PluginPanel } from './components/plugin-panel';
 import { modelManager } from './model-manager';
 import { MultiModelExecutor } from './services/multi-model-executor';
 
@@ -62,6 +63,9 @@ async function initializeApp(): Promise<void> {
 
     // Initialize Model Panel
     await initializeModelPanel();
+
+    // Initialize Plugin Panel
+    await initializePluginPanel();
 
     // Initialize Multi-Model Executor
     initializeMultiModelExecutor();
@@ -228,6 +232,21 @@ async function initializeModelPanel(): Promise<void> {
   } catch (error) {
     console.error('[Renderer] Model Panel initialization error:', error);
     updateStatus('Model Panel error', 5000);
+  }
+}
+
+/**
+ * Initialize Plugin Panel
+ */
+async function initializePluginPanel(): Promise<void> {
+  try {
+    const pluginPanel = new PluginPanel('plugin-panel-container');
+    pluginPanel.render();
+    console.log('[Renderer] Plugin Panel initialized');
+    updateStatus('Plugin Panel ready', 2000);
+  } catch (error) {
+    console.error('[Renderer] Plugin Panel initialization error:', error);
+    updateStatus('Plugin Panel error', 5000);
   }
 }
 
