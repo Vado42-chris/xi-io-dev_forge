@@ -7,6 +7,7 @@
 import { Router } from 'express';
 import authRoutes from './auth';
 import licenseRoutes from './licenses';
+import extensionRoutes from './extensions';
 
 const router = Router();
 
@@ -29,8 +30,8 @@ router.get('/', (req, res) => {
       health: '/api/health',
       auth: '/api/auth',
       licenses: '/api/licenses',
+      extensions: '/api/extensions',
       users: '/api/users (coming soon)',
-      extensions: '/api/extensions (coming soon)',
       support: '/api/support (coming soon)',
     }
   });
@@ -41,6 +42,9 @@ router.use('/auth', authRoutes);
 
 // License routes
 router.use('/licenses', licenseRoutes);
+
+// Extension routes
+router.use('/extensions', extensionRoutes);
 
 export default router;
 
