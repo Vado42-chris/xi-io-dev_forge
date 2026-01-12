@@ -5,7 +5,7 @@
  * Integrates Monaco Editor and Dev Forge features.
  */
 
-import { initializeMonacoEditor, setEditor } from './monaco-setup';
+import { initializeMonacoEditor, setEditor, openFileInEditor } from './monaco-setup';
 import { FileExplorer } from './file-explorer';
 
 // Wait for DOM to be ready
@@ -17,6 +17,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   // Initialize Monaco Editor
   await initializeEditor();
+
+  // Set up file opening handler
+  setupFileOpening();
 
   // Update status
   updateStatus('Dev Forge Ready');
@@ -99,6 +102,9 @@ async function initializeEditor(): Promise<void> {
     // Initialize Monaco Editor
     const editor = await initializeMonacoEditor('monaco-editor-container');
     setEditor(editor);
+    
+    // Store globally for file opening
+    (window as any).__devForgeEditor = editor;
 
     console.log('[Renderer] Monaco Editor initialized');
 
@@ -128,6 +134,30 @@ async function initializeFileExplorer(): Promise<void> {
   } catch (error) {
     console.error('[Renderer] File Explorer initialization error:', error);
   }
+}
+
+/**
+ * Set up file opening handler
+ */
+function setupFileOpening(): void {
+  window.addEventListener('file:open', async (event: any) => {
+    const { path, content } = event.detail;
+    const editor = getEditor();
+    
+    if (editor) {
+      await openFileInEditor(editor, path, content);
+      updateStatus(`Opened: ${path.split('/').pop()}`);
+    }
+  });
+}
+
+/**
+ * Get editor instance
+ */
+function getEditor(): any {
+  // Import getEditor from monaco-setup
+  // For now, we'll store it globally
+  return (window as any).__devForgeEditor;
 }
 
 /**

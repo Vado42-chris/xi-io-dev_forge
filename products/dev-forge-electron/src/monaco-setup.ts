@@ -2,10 +2,10 @@
  * Monaco Editor Setup
  * 
  * Initializes and configures Monaco Editor for Dev Forge.
+ * Uses Xibalba Framework theme and styling.
  */
 
-// Monaco Editor will be loaded dynamically
-// Using any for now until we set up proper module loading
+// Monaco Editor types
 declare const monaco: any;
 
 /**
@@ -13,17 +13,9 @@ declare const monaco: any;
  * Note: Monaco will be loaded via CDN or bundled
  */
 export async function initializeMonacoEditor(containerId: string): Promise<any> {
-  // Load Monaco Editor dynamically
-  if (typeof (window as any).monaco === 'undefined') {
-    // Monaco not loaded yet - will load via script tag in HTML
-    await new Promise(resolve => {
-      const checkMonaco = setInterval(() => {
-        if (typeof (window as any).monaco !== 'undefined') {
-          clearInterval(checkMonaco);
-          resolve(undefined);
-        }
-      }, 100);
-    });
+  // Wait for Monaco to be loaded
+  while (typeof (window as any).monaco === 'undefined') {
+    await new Promise(resolve => setTimeout(resolve, 100));
   }
 
   const monaco = (window as any).monaco;
@@ -113,4 +105,7 @@ export function getEditor(): any {
 export function setEditor(editor: any): void {
   editorInstance = editor;
 }
+
+// Export openFileInEditor
+export { openFileInEditor };
 

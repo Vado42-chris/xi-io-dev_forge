@@ -117,10 +117,22 @@ export class FileExplorer {
   /**
    * Open file
    */
-  private openFile(path: string): void {
-    // Emit event or call callback to open file in editor
-    console.log('[FileExplorer] Opening file:', path);
-    // This will be connected to Monaco Editor
+  private async openFile(path: string): Promise<void> {
+    try {
+      console.log('[FileExplorer] Opening file:', path);
+      
+      // Read file content
+      const content = await window.electronAPI.readFile(path);
+      
+      // Emit custom event for editor to handle
+      const event = new CustomEvent('file:open', {
+        detail: { path, content }
+      });
+      window.dispatchEvent(event);
+      
+    } catch (error) {
+      console.error('[FileExplorer] Error opening file:', error);
+    }
   }
 }
 
