@@ -46,13 +46,14 @@ app.get('/health', (req, res) => {
 // API Routes
 import authRoutes from './routes/auth';
 import paymentRoutes from './routes/payments';
+import licenseRoutes from './routes/licenses';
 // TODO: Import and use other route handlers
-// app.use('/api/licenses', licenseRoutes);
 // app.use('/api/extensions', extensionRoutes);
 // app.use('/api/support', supportRoutes);
 
 app.use('/api/auth', authRoutes);
 app.use('/api/payments', paymentRoutes);
+app.use('/api/licenses', licenseRoutes);
 
 // 404 handler
 app.use((req, res) => {
