@@ -18,11 +18,11 @@
   "author": "Xibalba Mixed Media Studio",
   "license": "MIT",
   "dependencies": {
-    "@dev-forge/core": "*",
-    "@types/vscode": "^1.84.0"
+    "@dev-forge/core": "*"
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
+    "@types/vscode": "^1.84.0",
     "typescript": "^5.3.3",
     "vitest": "^1.1.0"
   },
