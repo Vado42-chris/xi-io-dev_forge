@@ -30,6 +30,10 @@ export interface ImageMetadata {
   steps?: number;
   guidance?: number;
   style?: string;
+  upscaledFrom?: string;
+  upscaleFactor?: '2x' | '4x';
+  editedFrom?: string;
+  editInstructions?: string;
 }
 
 export interface ImageGenerationResult {
