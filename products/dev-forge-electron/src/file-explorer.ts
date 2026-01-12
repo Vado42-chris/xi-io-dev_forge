@@ -71,7 +71,7 @@ export class FileExplorer {
         };
 
         this.nodes.set(entryPath, node);
-        this.renderNode(node, treeContainer);
+        this.renderNode(node, treeContainer as HTMLElement);
       }
     } catch (error) {
       console.error('[FileExplorer] Error loading directory:', error);
