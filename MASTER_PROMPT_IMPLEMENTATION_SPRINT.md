@@ -22,7 +22,7 @@
 You are implementing Dev Forge following the locked-in implementation roadmap.
 
 CURRENT PHASE: Phase 2 - Core Features (Weeks 5-8)
-CURRENT WEEK: Week 6 - Electron App Core Features (35% Complete) ⏳
+CURRENT WEEK: Week 6 - Electron App Core Features (60% Complete) ⏳
 CURRENT FOCUS: Additional Electron app features, polish, and preparation for backend services
 
 REQUIREMENTS:
@@ -45,6 +45,12 @@ CURRENT TASKS:
 - ✅ Implement Image Generation Service
 - ✅ Implement Settings Manager
 - ✅ Implement Logger Service
+- ✅ Implement Command Palette
+- ✅ Implement Workspace Manager
+- ✅ Implement Search Service
+- ✅ Implement Notification Service
+- ✅ Implement Theme Manager
+- ⏳ Integrate Theme Manager into app
 - ⏳ Additional Electron app features
 - ⏳ Polish and optimization
 - ⏳ Prepare for Week 7-8 - Backend Core Services

@@ -2,28 +2,66 @@
  * System Integration Service
  * 
  * Integrates all Dev Forge systems together.
- * Coordinates ModelManager, FireTeams, HR, Plugins, and MultiModelExecutor.
+ * Coordinates ModelManager, FireTeams, HR, Plugins, MultiModelExecutor,
+ * Blockchain, Marketplace, Image Generation, Settings, Logger, Command Palette,
+ * Workspace Manager, Search Service, Notification Service, Theme Manager, and Shortcut Manager.
  */
 
 import { ModelManager } from '../model-manager';
 import { FireTeamsSystem } from '../systems/fire-teams';
 import { hrSystem } from '../systems/hr-system';
 import { MultiModelExecutor } from './multi-model-executor';
+import { blockchainSystem } from '../systems/blockchain-system';
+import { marketplaceSystem } from '../systems/marketplace-system';
+import { ImageGenerationService } from './image-generation-service';
+import { SettingsManager } from './settings-manager';
+import { Logger } from './logger';
+import { CommandPalette } from './command-palette';
+import { WorkspaceManager } from './workspace-manager';
+import { SearchService } from './search-service';
+import { NotificationService } from './notification-service';
+import { themeManager } from './theme-manager';
+import { shortcutManager } from './shortcut-manager';
+import { StatusManager } from '../status-manager';
 
 export class SystemIntegration {
   private modelManager: ModelManager;
   private fireTeamsSystem: FireTeamsSystem;
   private multiModelExecutor: MultiModelExecutor;
+  private imageGenerationService: ImageGenerationService;
+  private settingsManager: SettingsManager;
+  private logger: Logger;
+  private commandPalette: CommandPalette;
+  private workspaceManager: WorkspaceManager;
+  private searchService: SearchService;
+  private notificationService: NotificationService;
+  private statusManager: StatusManager;
   private initialized: boolean = false;
 
   constructor(
     modelManager: ModelManager,
     fireTeamsSystem: FireTeamsSystem,
-    multiModelExecutor: MultiModelExecutor
+    multiModelExecutor: MultiModelExecutor,
+    imageGenerationService: ImageGenerationService,
+    settingsManager: SettingsManager,
+    logger: Logger,
+    commandPalette: CommandPalette,
+    workspaceManager: WorkspaceManager,
+    searchService: SearchService,
+    notificationService: NotificationService,
+    statusManager: StatusManager
   ) {
     this.modelManager = modelManager;
     this.fireTeamsSystem = fireTeamsSystem;
     this.multiModelExecutor = multiModelExecutor;
+    this.imageGenerationService = imageGenerationService;
+    this.settingsManager = settingsManager;
+    this.logger = logger;
+    this.commandPalette = commandPalette;
+    this.workspaceManager = workspaceManager;
+    this.searchService = searchService;
+    this.notificationService = notificationService;
+    this.statusManager = statusManager;
   }
 
   /**
@@ -36,31 +74,133 @@ export class SystemIntegration {
     }
 
     try {
-      // 1. Check model availability
-      console.log('[SystemIntegration] Checking model availability...');
+      this.statusManager.update('Initializing core systems...', 'info');
+      this.logger.info('Initializing core systems...');
+
+      // 1. Initialize Settings Manager (needed early for other systems)
+      await this.settingsManager.load();
+      this.statusManager.update('Settings Manager ready.', 'info');
+      this.logger.info('Settings Manager ready.');
+
+      // 2. Initialize Theme Manager and apply theme
+      const themeId = this.settingsManager.get<string>('ui.theme', 'xibalba-dark');
+      themeManager.setTheme(themeId);
+      this.statusManager.update('Theme Manager ready.', 'info');
+      this.logger.info('Theme Manager ready.');
+
+      // 3. Initialize Shortcut Manager
+      shortcutManager.initialize();
+      this.statusManager.update('Shortcut Manager ready.', 'info');
+      this.logger.info('Shortcut Manager ready.');
+
+      // 4. Initialize Command Palette
+      this.commandPalette.initialize();
+      this.statusManager.update('Command Palette ready.', 'info');
+      this.logger.info('Command Palette ready.');
+
+      // 5. Initialize Workspace Manager
+      await this.workspaceManager.initialize();
+      this.statusManager.update('Workspace Manager ready.', 'info');
+      this.logger.info('Workspace Manager ready.');
+
+      // 6. Initialize Search Service
+      await this.searchService.initialize();
+      this.statusManager.update('Search Service ready.', 'info');
+      this.logger.info('Search Service ready.');
+
+      // 7. Initialize Notification Service
+      this.notificationService.initialize();
+      this.statusManager.update('Notification Service ready.', 'info');
+      this.logger.info('Notification Service ready.');
+
+      // 8. Check model availability
+      this.statusManager.update('Checking model availability...', 'info');
+      this.logger.info('Checking model availability...');
       await this.modelManager.checkAllModels();
 
-      // 2. Onboard default agents
-      console.log('[SystemIntegration] Onboarding default agents...');
+      // 9. Onboard default agents
+      this.statusManager.update('Onboarding default agents...', 'info');
+      this.logger.info('Onboarding default agents...');
       const agents = this.fireTeamsSystem.getAllAgents();
       for (const agent of agents) {
         await hrSystem.onboardAgent(agent);
       }
 
-      // 3. Set up model selection for agents
-      console.log('[SystemIntegration] Setting up agent-model connections...');
+      // 10. Set up model selection for agents
+      this.statusManager.update('Setting up agent-model connections...', 'info');
+      this.logger.info('Setting up agent-model connections...');
       this.setupAgentModelConnections();
 
-      // 4. Initialize Fire Teams with available models
-      console.log('[SystemIntegration] Initializing Fire Teams...');
+      // 11. Initialize Fire Teams with available models
+      this.statusManager.update('Initializing Fire Teams...', 'info');
+      this.logger.info('Initializing Fire Teams...');
       this.initializeFireTeams();
 
+      // 12. Blockchain System (no explicit init needed, genesis block created in constructor)
+      this.logger.info('Blockchain System ready.');
+
+      // 13. Marketplace System (no explicit init needed, default products created in constructor)
+      this.logger.info('Marketplace System ready.');
+
+      // 14. Image Generation Service (depends on ModelManager, already initialized)
+      this.logger.info('Image Generation Service ready.');
+
+      // Set up event listeners for cross-system communication
+      this.setupEventListeners();
+
       this.initialized = true;
+      this.statusManager.update('All core systems integrated and ready.', 'success', 3000);
+      this.logger.info('All core systems integrated and ready.');
       console.log('[SystemIntegration] All systems integrated successfully');
-    } catch (error) {
+    } catch (error: any) {
       console.error('[SystemIntegration] Initialization error:', error);
+      this.logger.error(`System integration failed: ${error.message}`, error);
+      this.statusManager.update(`System integration failed: ${error.message}`, 'error');
       throw error;
     }
+  }
+
+  /**
+   * Set up event listeners for cross-system communication
+   */
+  private setupEventListeners(): void {
+    // Theme change events
+    themeManager.onThemeChange((theme) => {
+      this.settingsManager.set('ui.theme', theme.id);
+      this.notificationService.send('Theme Changed', `Switched to ${theme.displayName}`, 'info');
+      this.logger.info(`Theme changed to ${theme.displayName}`);
+    });
+
+    // Command palette shortcuts
+    document.addEventListener('devforge:command-palette', () => {
+      // This would trigger the command palette UI
+      this.notificationService.send('Command Palette', 'Opening command palette...', 'info');
+    });
+
+    // Theme toggle shortcut
+    document.addEventListener('devforge:toggle-theme', () => {
+      const currentTheme = themeManager.getCurrentTheme();
+      const newThemeId = currentTheme.isDark ? 'xibalba-light' : 'xibalba-dark';
+      themeManager.setTheme(newThemeId);
+    });
+
+    // Model status changes
+    this.modelManager.onStatusChange(() => {
+      this.statusManager.update('Model status updated.', 'info', 1000);
+      this.logger.debug('Model status updated.');
+    });
+
+    // Agent status changes
+    hrSystem.onAgentStatusChange(() => {
+      this.statusManager.update('Agent status updated.', 'info', 1000);
+      this.logger.debug('Agent status updated.');
+    });
+
+    // Fire Team status changes
+    this.fireTeamsSystem.onTeamStatusChange(() => {
+      this.statusManager.update('Fire Team status updated.', 'info', 1000);
+      this.logger.debug('Fire Team status updated.');
+    });
   }
 
   /**
@@ -154,11 +294,19 @@ export class SystemIntegration {
     models: { total: number; available: number };
     agents: { total: number; available: number };
     teams: { total: number; active: number };
+    blockchain: { blocks: number; valid: boolean };
+    marketplace: { products: number };
+    workspaces: { total: number; active: number };
+    settings: { loaded: boolean };
     initialized: boolean;
   } {
     const models = this.modelManager.getAllModels();
     const agents = this.fireTeamsSystem.getAllAgents();
     const teams = this.fireTeamsSystem.getAllTeams();
+    const blockchain = blockchainSystem.getChain();
+    const marketplace = marketplaceSystem.getAllProducts();
+    const workspaces = this.workspaceManager.getAllWorkspaces();
+    const activeWorkspace = this.workspaceManager.getActiveWorkspace();
 
     return {
       models: {
@@ -172,6 +320,20 @@ export class SystemIntegration {
       teams: {
         total: teams.length,
         active: teams.filter(t => t.status === 'active').length,
+      },
+      blockchain: {
+        blocks: blockchain.length,
+        valid: blockchainSystem.isChainValid(blockchain),
+      },
+      marketplace: {
+        products: marketplace.length,
+      },
+      workspaces: {
+        total: workspaces.length,
+        active: activeWorkspace ? 1 : 0,
+      },
+      settings: {
+        loaded: this.settingsManager.isLoaded(),
       },
       initialized: this.initialized,
     };
