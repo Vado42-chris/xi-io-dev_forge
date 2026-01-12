@@ -37,13 +37,12 @@ app.use(requestLogger); // Log all requests
 app.use(rateLimiter);
 
 // Health check
-app.get('/health', (req, res) => {
-  res.json({ 
-    status: 'ok', 
-    timestamp: new Date().toISOString(),
-    service: 'dev-forge-backend',
-    version: '1.0.0'
-  });
+import { performHealthCheck } from './utils/healthCheck';
+
+app.get('/health', async (req, res) => {
+  const health = await performHealthCheck();
+  const statusCode = health.status === 'healthy' ? 200 : health.status === 'degraded' ? 200 : 503;
+  res.status(statusCode).json(health);
 });
 
 // API Routes
