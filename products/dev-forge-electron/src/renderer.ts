@@ -16,9 +16,11 @@ import { FireTeamsPanel } from './components/fire-teams-panel';
 import { MultiagentView } from './components/multiagent-view';
 import { PromptPanel } from './components/prompt-panel';
 import { PersonaPanel } from './components/persona-panel';
+import { SprintPanel } from './components/sprint-panel';
 import { modelManager } from './model-manager';
 import { fireTeamsSystem } from './systems/fire-teams';
 import { personaSystem } from './systems/persona-system';
+import { sprintSystem } from './systems/sprint-system';
 import { MultiModelExecutor } from './services/multi-model-executor';
 import { SystemIntegration } from './services/system-integration';
 
@@ -79,6 +81,9 @@ async function initializeApp(): Promise<void> {
 
     // Initialize Persona Panel
     await initializePersonaPanel();
+
+    // Initialize Sprint Panel
+    await initializeSprintPanel();
 
     // Initialize Multi-Model Executor
     initializeMultiModelExecutor();
@@ -305,6 +310,21 @@ async function initializePersonaPanel(): Promise<void> {
   } catch (error) {
     console.error('[Renderer] Persona Panel initialization error:', error);
     updateStatus('Persona Panel error', 5000);
+  }
+}
+
+/**
+ * Initialize Sprint Panel
+ */
+async function initializeSprintPanel(): Promise<void> {
+  try {
+    const sprintPanel = new SprintPanel('sprint-panel-container', sprintSystem);
+    sprintPanel.render();
+    console.log('[Renderer] Sprint Panel initialized');
+    updateStatus('Sprint Panel ready', 2000);
+  } catch (error) {
+    console.error('[Renderer] Sprint Panel initialization error:', error);
+    updateStatus('Sprint Panel error', 5000);
   }
 }
 
