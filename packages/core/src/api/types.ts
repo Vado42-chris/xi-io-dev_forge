@@ -138,7 +138,7 @@ export interface ApiProvider {
   /**
    * Check provider health
    */
-  getHealth(): Promise<import('../types').HealthStatus>;
+  getHealth(): Promise<CoreHealthStatus>;
 
   /**
    * Check if provider is available
@@ -157,7 +157,7 @@ export interface ApiProvider {
 export interface ApiRequest {
   prompt: string;
   model?: string;
-  options?: import('../types').GenerateOptions;
+  options?: CoreGenerateOptions;
 }
 
 /**

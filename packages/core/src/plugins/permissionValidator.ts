@@ -14,21 +14,19 @@ export class PermissionValidator {
   validate(permissions: PluginPermissions, action: string, resource: string): boolean {
     switch (action) {
       case 'readFile':
-        return this.validateFileAccess(permissions.readFiles, resource);
+        return this.validateFileAccess(permissions.fileSystem, resource);
       case 'writeFile':
-        return this.validateFileAccess(permissions.writeFiles, resource);
+        return this.validateFileAccess(permissions.fileSystem, resource);
       case 'executeFile':
-        return this.validateFileAccess(permissions.executeFiles, resource);
+        return this.validateFileAccess(permissions.fileSystem, resource);
       case 'network':
-        return permissions.networkAccess === true;
+        return permissions.network === true;
       case 'model':
-        return permissions.modelAccess?.includes(resource) || false;
+        return permissions.model?.includes(resource) || permissions.model?.includes('*') || false;
       case 'api':
-        return permissions.apiAccess?.includes(resource) || false;
+        return permissions.api?.includes(resource) || permissions.api?.includes('*') || false;
       case 'command':
-        return permissions.commandExecution === true;
-      case 'systemCommand':
-        return permissions.systemCommands === true;
+        return permissions.command?.includes(resource) || permissions.command?.includes('*') || false;
       default:
         return false;
     }
