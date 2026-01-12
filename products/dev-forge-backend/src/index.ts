@@ -59,6 +59,7 @@ import supportRoutes from './routes/support';
 import extensionRegistryRoutes from './routes/extensionRegistry';
 import chatbotRoutes from './routes/chatbot';
 import forumRoutes from './routes/forum';
+import financialRoutes from './routes/financial';
 
 app.use('/api/auth', authRoutes);
 app.use('/api/payments', paymentRoutes);
@@ -68,6 +69,7 @@ app.use('/api/support', supportRoutes);
 app.use('/api/registry', extensionRegistryRoutes);
 app.use('/api/chatbot', chatbotRoutes);
 app.use('/api/forum', forumRoutes);
+app.use('/api/financial', financialRoutes);
 
 // 404 handler
 app.use((req, res) => {
