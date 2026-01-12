@@ -7,6 +7,8 @@ import { PricingPage } from './components/pages/PricingPage'
 import { LoginPage } from './components/pages/LoginPage'
 import { SignupPage } from './components/pages/SignupPage'
 import { DashboardPage } from './components/pages/DashboardPage'
+import { DocsPage } from './components/pages/DocsPage'
+import { CommunityPage } from './components/pages/CommunityPage'
 import { NotFoundPage } from './components/pages/NotFoundPage'
 
 function App() {
@@ -19,6 +21,8 @@ function App() {
             <Route path="pricing" element={<PricingPage />} />
             <Route path="login" element={<LoginPage />} />
             <Route path="signup" element={<SignupPage />} />
+            <Route path="docs" element={<DocsPage />} />
+            <Route path="community" element={<CommunityPage />} />
             <Route
               path="dashboard"
               element={
