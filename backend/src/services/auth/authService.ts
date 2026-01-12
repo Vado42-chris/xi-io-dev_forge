@@ -189,11 +189,9 @@ export class AuthService {
    * Generate JWT token
    */
   private generateToken(userId: string, email: string): string {
-    return jwt.sign(
-      { userId, email },
-      this.jwtSecret,
-      { expiresIn: this.jwtExpiresIn }
-    );
+    const payload = { userId, email };
+    const options: jwt.SignOptions = { expiresIn: this.jwtExpiresIn };
+    return jwt.sign(payload, this.jwtSecret, options);
   }
 
   /**
