@@ -66,11 +66,17 @@ export class GGUFProvider implements ModelProvider {
     try {
       // Dynamic import of node-llama-cpp (ESM module)
       const llamaModule = await import('node-llama-cpp');
-      getLlama = llamaModule.getLlama || (llamaModule as any).default?.getLlama;
-      LlamaChatSession = llamaModule.LlamaChatSession || (llamaModule as any).default?.LlamaChatSession;
+      // node-llama-cpp exports getLlama as a named export or default
+      getLlama = (llamaModule as any).getLlama || (llamaModule as any).default?.getLlama || llamaModule;
+      LlamaChatSession = (llamaModule as any).LlamaChatSession || (llamaModule as any).default?.LlamaChatSession;
 
-      if (!getLlama) {
-        throw new Error('node-llama-cpp not properly installed or API changed');
+      if (!getLlama || typeof getLlama !== 'function') {
+        // Try accessing getLlama from default export
+        if ((llamaModule as any).default && typeof (llamaModule as any).default.getLlama === 'function') {
+          getLlama = (llamaModule as any).default.getLlama;
+        } else {
+          throw new Error('node-llama-cpp getLlama not found. Please check node-llama-cpp installation.');
+        }
       }
 
       // Initialize llama.cpp
