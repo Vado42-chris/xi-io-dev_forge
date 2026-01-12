@@ -10,6 +10,8 @@ import { v4 as uuidv4 } from 'uuid';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 import { extensionService } from './extensionService';
+import { securityScanner } from './securityScanner';
+import { codeQualityChecker } from './codeQualityChecker';
 
 const pool = getPool();
 
@@ -174,25 +176,44 @@ export const extensionRegistryService = {
     }
 
     // Check 2: Security scan
-    const securityCheck = await this.checkSecurity(submission.packageUrl);
-    checks.push(securityCheck);
-    if (!securityCheck.passed) {
-      errors.push(securityCheck.message);
-      score -= 30;
-    } else if (securityCheck.severity === 'warning') {
-      warnings.push(securityCheck.message);
-      score -= 10;
+    const securityResult = await securityScanner.scanPackage(submission.packageUrl, submission.manifest);
+    checks.push({
+      name: 'security_scan',
+      passed: securityResult.passed,
+      severity: securityResult.passed ? 'info' : 'error',
+      message: securityResult.passed 
+        ? 'Security scan passed' 
+        : `Security scan found ${securityResult.vulnerabilities.length} vulnerabilities`,
+      details: securityResult,
+    });
+    
+    if (!securityResult.passed) {
+      errors.push(...securityResult.vulnerabilities.map(v => v.description));
+      score -= securityResult.vulnerabilities.length * 10;
+    }
+    if (securityResult.warnings.length > 0) {
+      warnings.push(...securityResult.warnings.map(w => w.description));
+      score -= securityResult.warnings.length * 5;
     }
 
     // Check 3: Code quality
-    const qualityCheck = await this.checkCodeQuality(submission.packageUrl);
-    checks.push(qualityCheck);
-    if (!qualityCheck.passed) {
-      warnings.push(qualityCheck.message);
-      score -= 15;
-    } else if (qualityCheck.severity === 'info') {
-      suggestions.push(qualityCheck.message);
-      score -= 5;
+    const qualityResult = await codeQualityChecker.checkQuality(submission.packageUrl, submission.manifest);
+    checks.push({
+      name: 'code_quality',
+      passed: qualityResult.passed,
+      severity: qualityResult.passed ? 'info' : 'warning',
+      message: qualityResult.passed 
+        ? `Code quality check passed (Score: ${qualityResult.score})` 
+        : `Code quality issues found (Score: ${qualityResult.score})`,
+      details: qualityResult,
+    });
+    
+    if (!qualityResult.passed) {
+      warnings.push(...qualityResult.issues.map(i => i.message));
+      score -= (100 - qualityResult.score) / 10;
+    }
+    if (qualityResult.suggestions.length > 0) {
+      suggestions.push(...qualityResult.suggestions);
     }
 
     // Check 4: Package structure
@@ -265,47 +286,6 @@ export const extensionRegistryService = {
     };
   },
 
-  /**
-   * Check security
-   */
-  async checkSecurity(packageUrl: string): Promise<ReviewCheck> {
-    // TODO: Implement actual security scanning
-    // For now, return a placeholder check
-    
-    // Check for common security issues:
-    // - Malicious code patterns
-    // - Vulnerable dependencies
-    // - Unsafe file operations
-    // - Network access patterns
-
-    return {
-      name: 'security_scan',
-      passed: true,
-      severity: 'info',
-      message: 'Security scan passed (placeholder)',
-      details: {
-        note: 'Full security scanning to be implemented',
-      },
-    };
-  },
-
-  /**
-   * Check code quality
-   */
-  async checkCodeQuality(packageUrl: string): Promise<ReviewCheck> {
-    // TODO: Implement code quality checks
-    // - Linting
-    // - Type checking
-    // - Code complexity
-    // - Test coverage
-
-    return {
-      name: 'code_quality',
-      passed: true,
-      severity: 'info',
-      message: 'Code quality check passed (placeholder)',
-    };
-  },
 
   /**
    * Check package structure
