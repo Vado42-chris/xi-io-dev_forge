@@ -5,7 +5,7 @@
  */
 
 import * as vscode from 'vscode';
-import { PluginManager } from '../../src/services/plugins/pluginManager';
+import { PluginManager } from '../../../src/services/plugins/pluginManager';
 
 export class PluginManagerPanel {
   private static currentPanel: PluginManagerPanel | undefined;

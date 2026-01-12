@@ -12,8 +12,10 @@ import { GGUFBrowserPanel } from './ui/ggufBrowser';
 import { ApiProviderManagerPanel } from './ui/apiProviderManager';
 import { PluginManagerPanel } from './ui/pluginManager';
 import { ModelsTreeDataProvider, PluginsTreeDataProvider } from './ui/treeViews';
+import { StatusBarManager } from './ui/statusBar';
 
 let configManager: ConfigurationManager | undefined;
+let statusBarManager: StatusBarManager | undefined;
 
 /**
  * Extension activation
@@ -24,6 +26,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
   // Initialize configuration manager
   configManager = new ConfigurationManager(context);
   await configManager.initialize();
+
+  // Initialize status bar
+  statusBarManager = new StatusBarManager();
+  statusBarManager.updateModelStatus(null, null);
+  statusBarManager.updateProviderStatus(0);
+  statusBarManager.updatePluginStatus(0);
 
   // Register commands
   registerCommands(context);
@@ -49,6 +57,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 export function deactivate(): void {
   configManager?.dispose();
   configManager = undefined;
+  statusBarManager?.dispose();
+  statusBarManager = undefined;
 }
 
 /**

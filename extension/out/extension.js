@@ -43,7 +43,9 @@ exports.activate = activate;
 exports.deactivate = deactivate;
 const vscode = __importStar(require("vscode"));
 const configurationManager_1 = require("./services/configurationManager");
+const statusBar_1 = require("./ui/statusBar");
 let configManager;
+let statusBarManager;
 /**
  * Extension activation
  */
@@ -52,6 +54,11 @@ async function activate(context) {
     // Initialize configuration manager
     configManager = new configurationManager_1.ConfigurationManager(context);
     await configManager.initialize();
+    // Initialize status bar
+    statusBarManager = new statusBar_1.StatusBarManager();
+    statusBarManager.updateModelStatus(null, null);
+    statusBarManager.updateProviderStatus(0);
+    statusBarManager.updatePluginStatus(0);
     // Register commands
     registerCommands(context);
     // Listen for configuration changes
@@ -73,6 +80,8 @@ async function activate(context) {
 function deactivate() {
     configManager?.dispose();
     configManager = undefined;
+    statusBarManager?.dispose();
+    statusBarManager = undefined;
 }
 /**
  * Register extension commands

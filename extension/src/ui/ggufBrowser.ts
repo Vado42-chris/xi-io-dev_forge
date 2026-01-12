@@ -5,7 +5,7 @@
  */
 
 import * as vscode from 'vscode';
-import { GGUFProvider } from '../../src/services/providers/ggufProvider';
+import { GGUFProvider } from '../../../src/services/providers/ggufProvider';
 
 export class GGUFBrowserPanel {
   private static currentPanel: GGUFBrowserPanel | undefined;
@@ -72,22 +72,29 @@ export class GGUFBrowserPanel {
 
   private async _update() {
     const models = await this.ggufProvider.listModels();
-    const memoryUsage = this.ggufProvider.getMemoryUsage();
+    const memoryUsage = 0; // TODO: Add memory tracking to GGUFProvider
     const webview = this._panel.webview;
 
     this._panel.webview.html = this._getHtmlForWebview(webview, models, memoryUsage);
   }
 
   private async _scanModels() {
-    await this.ggufProvider.discoverModels();
+    // Re-initialize to scan for new models
+    await this.ggufProvider.initialize();
     await this._update();
   }
 
   private async _loadModel(modelId: string) {
     try {
-      await this.ggufProvider.loadModel(modelId);
-      vscode.window.showInformationMessage(`GGUF model loaded: ${modelId}`);
-      await this._update();
+      // GGUF models are loaded on-demand when generating
+      // For now, just verify the model exists
+      const model = await this.ggufProvider.getModel(modelId);
+      if (model) {
+        vscode.window.showInformationMessage(`GGUF model ready: ${modelId}`);
+        await this._update();
+      } else {
+        vscode.window.showErrorMessage(`GGUF model not found: ${modelId}`);
+      }
     } catch (error: any) {
       vscode.window.showErrorMessage(`Failed to load model: ${error.message}`);
     }
@@ -95,7 +102,8 @@ export class GGUFBrowserPanel {
 
   private async _unloadModel(modelId: string) {
     try {
-      await this.ggufProvider.unloadModel(modelId);
+      // Unload via dispose if available
+      await this.ggufProvider.dispose?.();
       vscode.window.showInformationMessage(`GGUF model unloaded: ${modelId}`);
       await this._update();
     } catch (error: any) {
@@ -104,7 +112,9 @@ export class GGUFBrowserPanel {
   }
 
   private async _getMemoryUsage() {
-    const usage = this.ggufProvider.getMemoryUsage();
+    // Memory usage tracking would need to be added to GGUFProvider
+    // For now, return 0
+    const usage = 0;
     this._panel.webview.postMessage({
       command: 'memoryUsage',
       usage

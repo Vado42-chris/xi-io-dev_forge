@@ -5,8 +5,8 @@
  */
 
 import * as vscode from 'vscode';
-import { ApiProviderRegistry } from '../../src/services/api/apiProviderRegistry';
-import { ApiKeyManager } from '../../src/services/api/apiKeyManager';
+import { ApiProviderRegistry } from '../../../src/services/api/apiProviderRegistry';
+import { ApiKeyManager } from '../../../src/services/api/apiKeyManager';
 
 export class ApiProviderManagerPanel {
   private static currentPanel: ApiProviderManagerPanel | undefined;
