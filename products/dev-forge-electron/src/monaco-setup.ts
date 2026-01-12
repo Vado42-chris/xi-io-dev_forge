@@ -19,6 +19,7 @@ export async function initializeMonacoEditor(containerId: string): Promise<any> 
   }
 
   const monaco = (window as any).monaco;
+  
   // Configure Monaco environment
   (window as any).MonacoEnvironment = {
     getWorkerUrl: function (moduleId: string, label: string) {
@@ -73,6 +74,8 @@ export async function initializeMonacoEditor(containerId: string): Promise<any> 
       { token: 'string', foreground: 'CE9178' },
       { token: 'number', foreground: 'B5CEA8' },
       { token: 'type', foreground: '4EC9B0' },
+      { token: 'function', foreground: 'DCDCAA' },
+      { token: 'variable', foreground: '9CDCFE' },
     ],
     colors: {
       'editor.background': '#050505', // Xibalba Framework dark background
@@ -84,6 +87,8 @@ export async function initializeMonacoEditor(containerId: string): Promise<any> 
       'editorWhitespace.foreground': '#3B3A32',
       'editorIndentGuide.activeBackground': '#707070',
       'editor.selectionHighlightBackground': '#ADD6FF26',
+      'editorWidget.background': '#252526',
+      'editorWidget.border': '#2d2d2d',
     }
   });
 
@@ -91,6 +96,62 @@ export async function initializeMonacoEditor(containerId: string): Promise<any> 
   monaco.editor.setTheme('xibalba-dark');
 
   return editor;
+}
+
+/**
+ * Detect language from file path
+ */
+function detectLanguage(filePath: string): string {
+  const ext = filePath.split('.').pop()?.toLowerCase();
+  const languageMap: Record<string, string> = {
+    'ts': 'typescript',
+    'tsx': 'typescript',
+    'js': 'javascript',
+    'jsx': 'javascript',
+    'json': 'json',
+    'html': 'html',
+    'css': 'css',
+    'scss': 'scss',
+    'md': 'markdown',
+    'py': 'python',
+    'java': 'java',
+    'cpp': 'cpp',
+    'c': 'c',
+    'go': 'go',
+    'rs': 'rust',
+    'php': 'php',
+    'rb': 'ruby',
+  };
+  return languageMap[ext || ''] || 'plaintext';
+}
+
+/**
+ * Open file in editor
+ */
+export async function openFileInEditor(editor: any, filePath: string, content: string): Promise<void> {
+  if (!editor) return;
+
+  // Wait for Monaco to be available
+  while (typeof (window as any).monaco === 'undefined') {
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+
+  const monaco = (window as any).monaco;
+
+  // Create or get model for file
+  const uri = monaco.Uri.file(filePath);
+  let model = monaco.editor.getModel(uri);
+
+  if (!model) {
+    // Detect language from file extension
+    const language = detectLanguage(filePath);
+    model = monaco.editor.createModel(content, language, uri);
+  } else {
+    model.setValue(content);
+  }
+
+  // Set model in editor
+  editor.setModel(model);
 }
 
 /**
@@ -105,7 +166,3 @@ export function getEditor(): any {
 export function setEditor(editor: any): void {
   editorInstance = editor;
 }
-
-// Export openFileInEditor
-export { openFileInEditor };
-
