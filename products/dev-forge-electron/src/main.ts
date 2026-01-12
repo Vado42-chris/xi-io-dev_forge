@@ -5,10 +5,15 @@
  * Handles window creation, app lifecycle, and system integration.
  */
 
-// Electron types are available at runtime
-const { app, BrowserWindow, ipcMain } = require('electron');
+// Electron - using require for runtime, types via @types/electron
 import * as path from 'path';
 import * as fs from 'fs';
+
+// Electron types - using any for now since we're using require
+const electron = require('electron');
+const app = electron.app;
+const BrowserWindow = electron.BrowserWindow;
+const ipcMain = electron.ipcMain;
 
 // IPC handlers for file system
 ipcMain.handle('fs:readFile', async (_: any, filePath: string) => {
@@ -76,7 +81,7 @@ ipcMain.handle('config:set', async (_: any, key: string, value: any) => {
 });
 
 // Keep a global reference of the window object
-let mainWindow: BrowserWindow | null = null;
+let mainWindow: any = null;
 
 /**
  * Create the main application window
@@ -163,7 +168,7 @@ app.whenReady().then(() => {
 
   app.on('activate', () => {
     // On macOS, re-create window when dock icon is clicked
-    if (BrowserWindow.getAllWindows().length === 0) {
+    if (BrowserWindow.getAllWindows && BrowserWindow.getAllWindows().length === 0) {
       createWindow();
     }
   });
