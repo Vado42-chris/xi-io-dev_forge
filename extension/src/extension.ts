@@ -14,13 +14,14 @@ import { PluginManagerPanel } from './ui/pluginManager';
 import { ModelsTreeDataProvider, PluginsTreeDataProvider } from './ui/treeViews';
 import { StatusBarManager } from './ui/statusBar';
 
-// Import services (using path alias)
-import { ModelProviderRegistry } from '@services/providers/modelProviderRegistry';
-import { OllamaProvider } from '@services/providers/ollamaProvider';
-import { GGUFProvider } from '@services/providers/ggufProvider';
-import { ApiProviderRegistry } from '@services/api/apiProviderRegistry';
-import { ApiKeyManager } from '@services/api/apiKeyManager';
-import { PluginManager } from '@services/plugins/pluginManager';
+// Import services (using relative paths from extension/src to src/services)
+// Note: These will be resolved at runtime from the extension's location
+import { ModelProviderRegistry } from '../../../src/services/providers/modelProviderRegistry';
+import { OllamaProvider } from '../../../src/services/providers/ollamaProvider';
+import { GGUFProvider } from '../../../src/services/providers/ggufProvider';
+import { ApiProviderRegistry } from '../../../src/services/api/apiProviderRegistry';
+import { ApiKeyManager } from '../../../src/services/api/apiKeyManager';
+import { PluginManager } from '../../../src/services/plugins/pluginManager';
 
 let configManager: ConfigurationManager | undefined;
 let statusBarManager: StatusBarManager | undefined;
