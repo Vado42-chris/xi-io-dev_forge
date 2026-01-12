@@ -456,6 +456,20 @@
         }
       }
     },
+    "views": {
+      "explorer": [
+        {
+          "id": "devForgeModels",
+          "name": "Dev Forge Models",
+          "when": "devForge.models.enabled"
+        },
+        {
+          "id": "devForgePlugins",
+          "name": "Dev Forge Plugins",
+          "when": "devForge.plugins.enabled"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "devForge.settings.open",

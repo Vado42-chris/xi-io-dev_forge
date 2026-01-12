@@ -84,8 +84,9 @@ function registerCommands(context) {
     });
     // Model commands
     const selectModelCommand = vscode.commands.registerCommand('devForge.models.select', async () => {
-        // TODO: Implement model selector
-        vscode.window.showInformationMessage('Model selector (coming soon)');
+        // TODO: Get modelProviderRegistry from extension context
+        // ModelSelectorPanel.createOrShow(context.extensionUri, modelProviderRegistry);
+        vscode.window.showInformationMessage('Model selector (coming soon - needs ModelProviderRegistry)');
     });
     const loadModelCommand = vscode.commands.registerCommand('devForge.models.load', async () => {
         // TODO: Implement model loading
@@ -97,22 +98,26 @@ function registerCommands(context) {
     });
     // GGUF commands
     const scanGGUFCommand = vscode.commands.registerCommand('devForge.gguf.scan', async () => {
-        // TODO: Implement GGUF scanning
-        vscode.window.showInformationMessage('GGUF scanning (coming soon)');
+        // TODO: Get ggufProvider from extension context
+        // GGUFBrowserPanel.createOrShow(context.extensionUri, ggufProvider);
+        vscode.window.showInformationMessage('GGUF browser (coming soon - needs GGUFProvider)');
     });
     // API provider commands
     const addApiProviderCommand = vscode.commands.registerCommand('devForge.apiProviders.add', async () => {
-        // TODO: Implement API provider addition
-        vscode.window.showInformationMessage('Add API provider (coming soon)');
+        // TODO: Get apiProviderRegistry and apiKeyManager from extension context
+        // ApiProviderManagerPanel.createOrShow(context.extensionUri, apiProviderRegistry, apiKeyManager);
+        vscode.window.showInformationMessage('API provider manager (coming soon - needs ApiProviderRegistry)');
     });
     const configureApiProviderCommand = vscode.commands.registerCommand('devForge.apiProviders.configure', async () => {
-        // TODO: Implement API provider configuration
-        vscode.window.showInformationMessage('Configure API provider (coming soon)');
+        // TODO: Get apiProviderRegistry and apiKeyManager from extension context
+        // ApiProviderManagerPanel.createOrShow(context.extensionUri, apiProviderRegistry, apiKeyManager);
+        vscode.window.showInformationMessage('API provider manager (coming soon - needs ApiProviderRegistry)');
     });
     // Plugin commands
     const managePluginsCommand = vscode.commands.registerCommand('devForge.plugins.manage', async () => {
-        // TODO: Implement plugin management
-        vscode.window.showInformationMessage('Plugin management (coming soon)');
+        // TODO: Get pluginManager from extension context
+        // PluginManagerPanel.createOrShow(context.extensionUri, pluginManager);
+        vscode.window.showInformationMessage('Plugin manager (coming soon - needs PluginManager)');
     });
     const installPluginCommand = vscode.commands.registerCommand('devForge.plugins.install', async () => {
         // TODO: Implement plugin installation
