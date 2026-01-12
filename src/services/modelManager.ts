@@ -251,7 +251,27 @@ export class ModelManager {
       throw new Error(`Model has no provider: ${modelId}`);
     }
 
-    const response = await this.providerRegistry.generate(model.provider, {
+    // Find the provider that owns this model
+    const provider = this.providerRegistry.getProvider(model.provider);
+    if (!provider) {
+      // Try to find by type if provider ID doesn't match
+      const providersByType = this.providerRegistry.getProvidersByType(model.provider as any);
+      if (providersByType.length === 0) {
+        throw new Error(`No provider found for model: ${modelId}`);
+      }
+      // Use first provider of this type
+      const response = await providersByType[0].generate({
+        prompt,
+        modelId,
+        options
+      });
+      if (!response.success) {
+        throw new Error(response.error || 'Generation failed');
+      }
+      return response.response;
+    }
+
+    const response = await provider.generate({
       prompt,
       modelId,
       options
