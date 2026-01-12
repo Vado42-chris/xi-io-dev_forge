@@ -8,6 +8,8 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosError, AxiosResponse } from 'axios';
 import { RequestCache } from './utils/requestCache';
 import { RateLimiter } from './utils/rateLimiter';
+import { Logger, LogLevel } from './utils/logger';
+import { MetricsCollector } from './utils/metrics';
 
 export interface ApiClientConfig {
   baseURL: string;
@@ -37,6 +39,8 @@ export class ApiClient {
   private token: string | null = null;
   private cache: RequestCache;
   private rateLimiter: RateLimiter;
+  private logger: Logger;
+  private metrics: MetricsCollector;
 
   constructor(config: ApiClientConfig) {
     this.config = {
@@ -54,9 +58,13 @@ export class ApiClient {
       },
     });
 
-    // Initialize cache and rate limiter
+    // Initialize cache, rate limiter, logger, and metrics
     this.cache = new RequestCache();
     this.rateLimiter = new RateLimiter();
+    this.logger = new Logger(
+      process.env.NODE_ENV === 'development' ? LogLevel.DEBUG : LogLevel.INFO
+    );
+    this.metrics = new MetricsCollector();
 
     // Clean up expired cache entries periodically
     setInterval(() => {
@@ -160,18 +168,47 @@ export class ApiClient {
       };
     }
 
+    const startTime = Date.now();
+    
     try {
+      this.logger.debug(`GET ${url}`, config?.params);
+      
       const response = await this.client.get<ApiResponse<T>>(url, config);
+      const duration = Date.now() - startTime;
       const formatted = this.formatResponse(response);
+
+      // Record metrics
+      this.metrics.record({
+        url,
+        method: 'GET',
+        duration,
+        statusCode: response.status,
+        success: formatted.success,
+      });
 
       // Cache successful responses
       if (useCache && formatted.success && formatted.data) {
         this.cache.set(cacheKey, formatted.data, config?.cacheTTL);
       }
 
+      this.logger.debug(`GET ${url} completed`, { duration, success: formatted.success });
       return formatted;
     } catch (error) {
-      return this.formatError(error);
+      const duration = Date.now() - startTime;
+      const formatted = this.formatError(error);
+
+      // Record metrics
+      this.metrics.record({
+        url,
+        method: 'GET',
+        duration,
+        statusCode: (error as AxiosError).response?.status,
+        success: false,
+        error: formatted.error?.message,
+      });
+
+      this.logger.error(`GET ${url} failed`, { duration, error: formatted.error });
+      return formatted;
     }
   }
 
@@ -280,6 +317,34 @@ export class ApiClient {
    */
   async healthCheck(): Promise<ApiResponse> {
     return this.get('/health');
+  }
+
+  /**
+   * Get cache statistics
+   */
+  getCacheStats() {
+    return this.cache.getStats();
+  }
+
+  /**
+   * Get metrics statistics
+   */
+  getMetricsStats() {
+    return this.metrics.getStats();
+  }
+
+  /**
+   * Get logger instance
+   */
+  getLogger(): Logger {
+    return this.logger;
+  }
+
+  /**
+   * Get metrics collector
+   */
+  getMetrics(): MetricsCollector {
+    return this.metrics;
   }
 }
 
