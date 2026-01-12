@@ -190,9 +190,10 @@ export class AuthService {
    */
   private generateToken(userId: string, email: string): string {
     const payload = { userId, email };
-    const options: jwt.SignOptions = { 
+    // Type assertion needed due to strict jsonwebtoken types
+    const options = { 
       expiresIn: this.jwtExpiresIn 
-    };
+    } as jwt.SignOptions;
     return jwt.sign(payload, this.jwtSecret, options);
   }
 
