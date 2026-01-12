@@ -9,6 +9,7 @@ import authRoutes from './auth';
 import licenseRoutes from './licenses';
 import extensionRoutes from './extensions';
 import supportRoutes from './support';
+import analyticsRoutes from './analytics';
 
 const router = Router();
 
@@ -33,6 +34,7 @@ router.get('/', (req, res) => {
       licenses: '/api/licenses',
       extensions: '/api/extensions',
       support: '/api/support',
+      analytics: '/api/analytics',
       users: '/api/users (coming soon)',
     }
   });
@@ -49,6 +51,9 @@ router.use('/extensions', extensionRoutes);
 
 // Support routes
 router.use('/support', supportRoutes);
+
+// Analytics routes
+router.use('/analytics', analyticsRoutes);
 
 export default router;
 
