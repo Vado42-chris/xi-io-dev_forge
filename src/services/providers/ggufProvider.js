@@ -43,6 +43,8 @@ exports.GGUFProvider = void 0;
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 // Dynamic import for node-llama-cpp (ESM module)
+// Note: node-llama-cpp exports are accessed via default import
+let llamaModule;
 let getLlama;
 let LlamaChatSession;
 class GGUFProvider {

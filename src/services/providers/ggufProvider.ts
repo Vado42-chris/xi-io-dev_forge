@@ -10,6 +10,8 @@ import * as fs from 'fs';
 import * as path from 'path';
 
 // Dynamic import for node-llama-cpp (ESM module)
+// Note: node-llama-cpp exports are accessed via default import
+let llamaModule: any;
 let getLlama: any;
 let LlamaChatSession: any;
 

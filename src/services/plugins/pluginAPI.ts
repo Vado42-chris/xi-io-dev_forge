@@ -18,7 +18,7 @@ export class PluginAPI implements DevForgePluginAPI {
   private modelProviderRegistry: ModelProviderRegistry;
   private apiProviderRegistry: ApiProviderRegistry;
   private permissions: PluginPermissions;
-  private commands: Map<string, Command> = new Map();
+  private registeredCommands: Map<string, Command> = new Map();
   private webviews: Map<string, any> = new Map();
   private treeViews: Map<string, any> = new Map();
   private eventHandlers: Map<string, Function[]> = new Map();
@@ -98,14 +98,14 @@ export class PluginAPI implements DevForgePluginAPI {
       if (!this.permissionValidator.validate(this.permissions, 'command', command.id)) {
         throw new Error(`Permission denied: Cannot register command ${command.id}`);
       }
-      this.commands.set(command.id, command);
+      this.registeredCommands.set(command.id, command);
       
       // Register with VS Code
       this.vscodeAPI.commands.registerCommand(command.id, command.handler);
     },
 
     execute: async (commandId: string, ...args: any[]) => {
-      const command = this.commands.get(commandId);
+      const command = this.registeredCommands.get(commandId);
       if (!command) {
         throw new Error(`Command not found: ${commandId}`);
       }

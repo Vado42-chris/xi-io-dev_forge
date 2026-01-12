@@ -8,7 +8,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PluginAPI = void 0;
 class PluginAPI {
     constructor(vscodeAPI, permissionValidator, modelProviderRegistry, apiProviderRegistry, permissions) {
-        this.commands = new Map();
+        this.registeredCommands = new Map();
         this.webviews = new Map();
         this.treeViews = new Map();
         this.eventHandlers = new Map();
@@ -66,12 +66,12 @@ class PluginAPI {
                 if (!this.permissionValidator.validate(this.permissions, 'command', command.id)) {
                     throw new Error(`Permission denied: Cannot register command ${command.id}`);
                 }
-                this.commands.set(command.id, command);
+                this.registeredCommands.set(command.id, command);
                 // Register with VS Code
                 this.vscodeAPI.commands.registerCommand(command.id, command.handler);
             },
             execute: async (commandId, ...args) => {
-                const command = this.commands.get(commandId);
+                const command = this.registeredCommands.get(commandId);
                 if (!command) {
                     throw new Error(`Command not found: ${commandId}`);
                 }
