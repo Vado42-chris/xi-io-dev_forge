@@ -22,6 +22,7 @@
   "author": "Chris Hallberg",
   "license": "MIT",
   "dependencies": {
+    "axios": "^1.13.2",
     "node-llama-cpp": "^2.8.16"
   },
   "devDependencies": {
