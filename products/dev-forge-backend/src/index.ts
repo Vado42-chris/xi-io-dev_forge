@@ -63,6 +63,7 @@ import financialRoutes from './routes/financial';
 import analyticsRoutes from './routes/analytics';
 import distributionRoutes from './routes/distribution';
 import automationRoutes from './routes/automation';
+import integrationRoutes from './routes/integration';
 
 app.use('/api/auth', authRoutes);
 app.use('/api/payments', paymentRoutes);
@@ -76,6 +77,7 @@ app.use('/api/financial', financialRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/distribution', distributionRoutes);
 app.use('/api/automation', automationRoutes);
+app.use('/api/integration', integrationRoutes);
 
 // 404 handler
 app.use((req, res) => {
