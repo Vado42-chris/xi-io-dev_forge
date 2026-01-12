@@ -63,12 +63,12 @@ async function saveConfig(): Promise<void> {
   }
 }
 
-ipcMain.handle('config:get', async (_, key: string) => {
+ipcMain.handle('config:get', async (_: any, key: string) => {
   await loadConfig();
   return configCache[key];
 });
 
-ipcMain.handle('config:set', async (_, key: string, value: any) => {
+ipcMain.handle('config:set', async (_: any, key: string, value: any) => {
   await loadConfig();
   configCache[key] = value;
   await saveConfig();
@@ -181,7 +181,7 @@ ipcMain.handle('app:getVersion', () => {
   return app.getVersion();
 });
 
-ipcMain.handle('app:getPath', (_, pathName: string) => {
+ipcMain.handle('app:getPath', (_: any, pathName: string) => {
   return app.getPath(pathName as any);
 });
 
