@@ -190,9 +190,11 @@ export class AuthService {
    */
   private generateToken(userId: string, email: string): string {
     const payload = { userId, email };
-    const options: jwt.SignOptions = { 
-      expiresIn: this.jwtExpiresIn as string | number 
-    };
+    // JWT expiresIn accepts string or number
+    const expiresIn = typeof this.jwtExpiresIn === 'string' 
+      ? this.jwtExpiresIn 
+      : this.jwtExpiresIn;
+    const options: jwt.SignOptions = { expiresIn };
     return jwt.sign(payload, this.jwtSecret, options);
   }
 
