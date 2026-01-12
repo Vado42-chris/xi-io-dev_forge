@@ -68,6 +68,72 @@
       border-right: 1px solid #2d2d2d;
       display: flex;
       flex-direction: column;
+      overflow-y: auto;
+    }
+
+    /* File Explorer */
+    .file-explorer {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .file-explorer-header {
+      height: 32px;
+      padding: 0 12px;
+      display: flex;
+      align-items: center;
+      background-color: #2d2d2d;
+      border-bottom: 1px solid #1e1e1e;
+    }
+
+    .file-explorer-title {
+      font-family: 'Antonio', sans-serif;
+      font-weight: 100;
+      font-size: 11px;
+      letter-spacing: 1px;
+      color: #CCCCCC;
+      text-transform: uppercase;
+    }
+
+    .file-explorer-content {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .file-tree {
+      padding: 4px 0;
+    }
+
+    .file-tree-node {
+      display: flex;
+      align-items: center;
+      padding: 4px 12px;
+      cursor: pointer;
+      font-size: 13px;
+      color: #CCCCCC;
+      /* Pattern #210: Minimal borders */
+    }
+
+    .file-tree-node:hover {
+      background-color: #2a2d2e;
+    }
+
+    .file-tree-icon {
+      margin-right: 8px;
+      font-size: 16px;
+    }
+
+    .file-tree-name {
+      flex: 1;
+    }
+
+    .file-tree-loading,
+    .file-tree-error {
+      padding: 12px;
+      color: #CCCCCC;
+      font-size: 13px;
     }
 
     /* Editor Area */
@@ -114,7 +180,7 @@
     </div>
     <div class="main-content">
       <div class="sidebar">
-        <!-- Sidebar content will be added -->
+        <div id="file-explorer-container"></div>
       </div>
       <div class="editor-area">
         <div class="loading">

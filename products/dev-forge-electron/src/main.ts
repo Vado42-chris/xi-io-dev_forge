@@ -5,12 +5,13 @@
  * Handles window creation, app lifecycle, and system integration.
  */
 
-import { app, BrowserWindow, ipcMain } from 'electron';
+// Electron types are available at runtime
+const { app, BrowserWindow, ipcMain } = require('electron');
 import * as path from 'path';
 import * as fs from 'fs';
 
 // IPC handlers for file system
-ipcMain.handle('fs:readFile', async (_, filePath: string) => {
+ipcMain.handle('fs:readFile', async (_: any, filePath: string) => {
   try {
     const data = await fs.promises.readFile(filePath, 'utf-8');
     return data;
@@ -19,7 +20,7 @@ ipcMain.handle('fs:readFile', async (_, filePath: string) => {
   }
 });
 
-ipcMain.handle('fs:writeFile', async (_, filePath: string, data: string) => {
+ipcMain.handle('fs:writeFile', async (_: any, filePath: string, data: string) => {
   try {
     await fs.promises.writeFile(filePath, data, 'utf-8');
   } catch (error: any) {
@@ -27,7 +28,7 @@ ipcMain.handle('fs:writeFile', async (_, filePath: string, data: string) => {
   }
 });
 
-ipcMain.handle('fs:readDir', async (_, dirPath: string) => {
+ipcMain.handle('fs:readDir', async (_: any, dirPath: string) => {
   try {
     const entries = await fs.promises.readdir(dirPath, { withFileTypes: true });
     return entries.map(entry => entry.name);

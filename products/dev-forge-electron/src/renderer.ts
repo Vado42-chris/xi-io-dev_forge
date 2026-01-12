@@ -6,6 +6,7 @@
  */
 
 import { initializeMonacoEditor, setEditor } from './monaco-setup';
+import { FileExplorer } from './file-explorer';
 
 // Wait for DOM to be ready
 document.addEventListener('DOMContentLoaded', async () => {
@@ -39,6 +40,9 @@ async function initializeApp(): Promise<void> {
 
     // Initialize UI
     initializeUI();
+
+    // Initialize File Explorer
+    await initializeFileExplorer();
 
   } catch (error) {
     console.error('[Renderer] Initialization error:', error);
@@ -109,6 +113,20 @@ async function initializeEditor(): Promise<void> {
   } catch (error) {
     console.error('[Renderer] Editor initialization error:', error);
     updateStatus('Error initializing editor');
+  }
+}
+
+/**
+ * Initialize File Explorer
+ */
+async function initializeFileExplorer(): Promise<void> {
+  try {
+    // Get user's home directory or current working directory
+    const homePath = await window.electronAPI.getPath('home');
+    const explorer = new FileExplorer('file-explorer-container', homePath);
+    console.log('[Renderer] File Explorer initialized');
+  } catch (error) {
+    console.error('[Renderer] File Explorer initialization error:', error);
   }
 }
 
