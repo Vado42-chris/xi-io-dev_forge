@@ -68,7 +68,51 @@
       border-right: 1px solid #2d2d2d;
       display: flex;
       flex-direction: column;
+    }
+
+    .sidebar-tabs {
+      display: flex;
+      background-color: #2d2d2d;
+      border-bottom: 1px solid #3c3c3c;
+    }
+
+    .sidebar-tab {
+      flex: 1;
+      padding: 8px 12px;
+      background: none;
+      border: none;
+      color: #CCCCCC;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border-bottom: 2px solid transparent;
+    }
+
+    .sidebar-tab:hover {
+      color: #FFFFFF;
+      background-color: #3c3c3c;
+    }
+
+    .sidebar-tab.active {
+      color: #007acc;
+      border-bottom-color: #007acc;
+    }
+
+    .sidebar-content {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .sidebar-panel {
+      display: none;
+      height: 100%;
       overflow-y: auto;
+    }
+
+    .sidebar-panel.active {
+      display: block;
     }
 
     /* File Explorer */
@@ -184,7 +228,14 @@
     </div>
     <div class="main-content">
       <div class="sidebar">
-        <div id="file-explorer-container"></div>
+        <div class="sidebar-tabs">
+          <button class="sidebar-tab active" data-tab="explorer">Files</button>
+          <button class="sidebar-tab" data-tab="models">Models</button>
+        </div>
+        <div class="sidebar-content">
+          <div id="file-explorer-container" class="sidebar-panel active" data-panel="explorer"></div>
+          <div id="model-panel-container" class="sidebar-panel" data-panel="models"></div>
+        </div>
       </div>
       <div class="editor-area">
         <div class="loading">
