@@ -99,7 +99,7 @@ export class PluginManager {
     // Plugin config should be provided via config adapter in future
     // For now, return default enabled config
     return {
-      id: pluginId,
+      
       enabled: true
     };
   }
