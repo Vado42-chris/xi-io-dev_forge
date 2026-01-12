@@ -1,0 +1,307 @@
+/**
+ * Multiagent View Styles
+ * 
+ * Xibalba Framework styling for multiagent view.
+ */
+
+.multiagent-view {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background-color: #1e1e1e;
+  padding: 16px;
+}
+
+.multiagent-view-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.multiagent-view-header h2 {
+  font-family: var(--font-tall-thin);
+  font-size: 24px;
+  font-weight: 100;
+  letter-spacing: 2px;
+  color: var(--xibalba-text-primary);
+  margin: 0;
+}
+
+.view-controls {
+  display: flex;
+  gap: 8px;
+}
+
+.multiagent-view-content {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.prompt-section {
+  background-color: #252526;
+  border: 1px solid var(--xibalba-border);
+  border-radius: 4px;
+  padding: 16px;
+}
+
+.prompt-section label {
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--xibalba-text-primary);
+  margin-bottom: 8px;
+}
+
+.prompt-input {
+  width: 100%;
+  padding: 12px;
+  background-color: #1e1e1e;
+  border: 1px solid var(--xibalba-border);
+  border-radius: 4px;
+  color: var(--xibalba-text-primary);
+  font-size: 14px;
+  font-family: var(--font-body);
+  resize: vertical;
+  margin-bottom: 16px;
+}
+
+.prompt-input:focus {
+  outline: none;
+  border-color: var(--xibalba-accent);
+}
+
+.model-selection {
+  margin-bottom: 16px;
+}
+
+.model-selection label {
+  display: block;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--xibalba-text-secondary);
+  margin-bottom: 8px;
+}
+
+.model-checkboxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.model-checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--xibalba-text-secondary);
+  cursor: pointer;
+}
+
+.model-checkbox {
+  cursor: pointer;
+}
+
+.agents-section h3,
+.results-section h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--xibalba-text-primary);
+  margin-bottom: 16px;
+}
+
+.agents-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.agent-card-large {
+  background-color: #252526;
+  border: 1px solid var(--xibalba-border);
+  border-radius: 4px;
+  padding: 16px;
+  transition: all 0.2s ease;
+}
+
+.agent-card-large:hover {
+  border-color: var(--xibalba-accent);
+}
+
+.agent-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.agent-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.agent-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--xibalba-text-primary);
+}
+
+.agent-role {
+  font-size: 12px;
+  color: var(--xibalba-text-secondary);
+  text-transform: uppercase;
+}
+
+.agent-status {
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.status-working {
+  background-color: rgba(40, 167, 69, 0.2);
+  color: #28a745;
+}
+
+.status-idle {
+  background-color: rgba(108, 117, 125, 0.2);
+  color: #6c757d;
+}
+
+.status-waiting {
+  background-color: rgba(255, 193, 7, 0.2);
+  color: #ffc107;
+}
+
+.status-error {
+  background-color: rgba(220, 53, 69, 0.2);
+  color: #dc3545;
+}
+
+.agent-card-body {
+  margin-top: 12px;
+}
+
+.current-task {
+  background-color: #1e1e1e;
+  border: 1px solid var(--xibalba-border);
+  border-radius: 4px;
+  padding: 8px;
+  margin-bottom: 8px;
+}
+
+.current-task strong {
+  display: block;
+  font-size: 12px;
+  color: var(--xibalba-text-secondary);
+  margin-bottom: 4px;
+}
+
+.task-progress {
+  font-size: 11px;
+  color: var(--xibalba-accent);
+  text-transform: uppercase;
+}
+
+.no-task {
+  font-size: 12px;
+  color: var(--xibalba-text-secondary);
+  font-style: italic;
+}
+
+.agent-metrics {
+  display: flex;
+  gap: 16px;
+  font-size: 11px;
+  color: var(--xibalba-text-secondary);
+  margin-top: 8px;
+}
+
+.results-container {
+  background-color: #252526;
+  border: 1px solid var(--xibalba-border);
+  border-radius: 4px;
+  padding: 16px;
+  min-height: 200px;
+}
+
+.results-summary {
+  font-size: 14px;
+  color: var(--xibalba-text-primary);
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--xibalba-border);
+}
+
+.results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.result-card {
+  background-color: #1e1e1e;
+  border: 1px solid var(--xibalba-border);
+  border-radius: 4px;
+  padding: 12px;
+}
+
+.result-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.result-model {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--xibalba-text-primary);
+}
+
+.result-duration {
+  font-size: 11px;
+  color: var(--xibalba-text-secondary);
+  font-family: var(--font-tech);
+}
+
+.result-content {
+  margin-top: 8px;
+}
+
+.result-text {
+  font-size: 12px;
+  color: var(--xibalba-text-primary);
+  font-family: var(--font-tech);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin: 0;
+}
+
+.result-error {
+  font-size: 12px;
+  color: #dc3545;
+}
+
+.loading-state,
+.empty-state {
+  padding: 24px;
+  text-align: center;
+  color: var(--xibalba-text-secondary);
+  font-size: 14px;
+}
+
+.error-state {
+  padding: 16px;
+  background-color: rgba(220, 53, 69, 0.1);
+  border: 1px solid #dc3545;
+  border-radius: 4px;
+  color: #dc3545;
+  font-size: 14px;
+}
+

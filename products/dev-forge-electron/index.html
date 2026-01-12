@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="styles/model-panel.css">
   <link rel="stylesheet" href="styles/plugin-panel.css">
   <link rel="stylesheet" href="styles/fire-teams-panel.css">
+  <link rel="stylesheet" href="styles/multiagent-view.css">
   <style>
     /* Xibalba Framework - Base Styles */
     * {
@@ -196,6 +197,50 @@
       position: relative;
     }
 
+    .editor-tabs {
+      display: flex;
+      background-color: #2d2d2d;
+      border-bottom: 1px solid #3c3c3c;
+    }
+
+    .editor-tab {
+      padding: 8px 16px;
+      background: none;
+      border: none;
+      color: #CCCCCC;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border-bottom: 2px solid transparent;
+    }
+
+    .editor-tab:hover {
+      color: #FFFFFF;
+      background-color: #3c3c3c;
+    }
+
+    .editor-tab.active {
+      color: #007acc;
+      border-bottom-color: #007acc;
+    }
+
+    .editor-content {
+      flex: 1;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .editor-panel {
+      display: none;
+      height: 100%;
+      width: 100%;
+    }
+
+    .editor-panel.active {
+      display: block;
+    }
+
     /* Monaco Editor Container */
     #monaco-editor-container {
       width: 100%;
@@ -244,11 +289,22 @@
           <div id="fire-teams-panel-container" class="sidebar-panel" data-panel="fire-teams"></div>
         </div>
       </div>
-      <div class="editor-area">
-        <div class="loading">
-          Loading Dev Forge...
-        </div>
-      </div>
+          <div class="editor-area">
+            <div class="editor-tabs">
+              <button class="editor-tab active" data-tab="editor">Editor</button>
+              <button class="editor-tab" data-tab="multiagent">Multiagent</button>
+            </div>
+            <div class="editor-content">
+              <div id="editor-panel" class="editor-panel active">
+                <div class="loading">
+                  Loading Dev Forge...
+                </div>
+              </div>
+              <div id="multiagent-view-container" class="editor-panel">
+                <!-- Multiagent view will be rendered here -->
+              </div>
+            </div>
+          </div>
     </div>
     <div class="status-bar">
       <span>Ready</span>

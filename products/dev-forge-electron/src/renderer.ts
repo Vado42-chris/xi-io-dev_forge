@@ -13,6 +13,7 @@ import { AppConfigManager } from './app-config';
 import { ModelPanel } from './components/model-panel';
 import { PluginPanel } from './components/plugin-panel';
 import { FireTeamsPanel } from './components/fire-teams-panel';
+import { MultiagentView } from './components/multiagent-view';
 import { modelManager } from './model-manager';
 import { fireTeamsSystem } from './systems/fire-teams';
 import { MultiModelExecutor } from './services/multi-model-executor';
@@ -75,8 +76,14 @@ async function initializeApp(): Promise<void> {
     // Initialize Multi-Model Executor
     initializeMultiModelExecutor();
 
+    // Initialize Multiagent View
+    await initializeMultiagentView();
+
     // Set up sidebar tabs
     setupSidebarTabs();
+
+    // Set up editor tabs
+    setupEditorTabs();
 
   } catch (error) {
     console.error('[Renderer] Initialization error:', error);
@@ -123,13 +130,13 @@ function initializeUI(): void {
     loadingElement.remove();
   }
 
-  // Create editor container
-  const editorArea = document.querySelector('.editor-area');
-  if (editorArea) {
-    editorArea.innerHTML = `
-      <div id="monaco-editor-container" style="width: 100%; height: 100%;"></div>
-    `;
-  }
+    // Create editor container in editor panel
+    const editorPanel = document.getElementById('editor-panel');
+    if (editorPanel) {
+      editorPanel.innerHTML = `
+        <div id="monaco-editor-container" style="width: 100%; height: 100%;"></div>
+      `;
+    }
 }
 
 /**
@@ -271,11 +278,66 @@ async function initializeFireTeamsPanel(): Promise<void> {
 }
 
 /**
+ * Initialize Multiagent View
+ */
+async function initializeMultiagentView(): Promise<void> {
+  try {
+    if (!multiModelExecutor) {
+      console.warn('[Renderer] Multi-Model Executor not initialized yet');
+      return;
+    }
+
+    const multiagentView = new MultiagentView(
+      'multiagent-view-container',
+      fireTeamsSystem,
+      multiModelExecutor
+    );
+    multiagentView.render();
+    console.log('[Renderer] Multiagent View initialized');
+    updateStatus('Multiagent View ready', 2000);
+  } catch (error) {
+    console.error('[Renderer] Multiagent View initialization error:', error);
+    updateStatus('Multiagent View error', 5000);
+  }
+}
+
+/**
  * Initialize Multi-Model Executor
  */
 function initializeMultiModelExecutor(): void {
   multiModelExecutor = new MultiModelExecutor(modelManager);
   console.log('[Renderer] Multi-Model Executor initialized');
+  
+  // Initialize multiagent view after executor is ready
+  setTimeout(() => {
+    initializeMultiagentView();
+  }, 100);
+}
+
+/**
+ * Set up editor tabs
+ */
+function setupEditorTabs(): void {
+  const tabs = document.querySelectorAll('.editor-tab');
+  const panels = document.querySelectorAll('.editor-panel');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const targetTab = tab.getAttribute('data-tab');
+      
+      // Update tab states
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      
+      // Update panel states
+      panels.forEach(p => p.classList.remove('active'));
+      const targetPanel = document.getElementById(`${targetTab}-panel`) || 
+                         document.getElementById(`${targetTab}-view-container`);
+      if (targetPanel) {
+        targetPanel.classList.add('active');
+      }
+    });
+  });
 }
 
 /**
