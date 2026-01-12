@@ -190,8 +190,8 @@ ipcMain.handle('app:getUserData', () => {
 });
 
 // Security: Prevent new window creation
-app.on('web-contents-created', (_, contents) => {
-  contents.on('new-window', (event, navigationUrl) => {
+app.on('web-contents-created', (_: any, contents: any) => {
+  contents.on('new-window', (event: any, navigationUrl: string) => {
     event.preventDefault();
     // Open in external browser instead
     require('electron').shell.openExternal(navigationUrl);
