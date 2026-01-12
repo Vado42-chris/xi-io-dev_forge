@@ -5,6 +5,7 @@
  */
 
 import { Router, Request, Response } from 'express';
+import express from 'express';
 import { authenticate, AuthRequest } from '../middleware/auth';
 import { paymentService } from '../services/paymentService';
 import { logger } from '../utils/logger';
