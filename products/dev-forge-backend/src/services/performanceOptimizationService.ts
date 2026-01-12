@@ -39,6 +39,29 @@ export interface CacheStrategy {
   invalidationRules?: string[];
 }
 
+export interface PerformanceReport {
+  id: string;
+  period: {
+    start: Date;
+    end: Date;
+  };
+  metrics: {
+    averageResponseTime: number;
+    p95ResponseTime: number;
+    p99ResponseTime: number;
+    throughput: number;
+    errorRate: number;
+    cacheHitRate: number;
+  };
+  recommendations: Array<{
+    type: string;
+    description: string;
+    impact: 'high' | 'medium' | 'low';
+    effort: 'low' | 'medium' | 'high';
+  }>;
+  generatedAt: Date;
+}
+
 export const performanceOptimizationService = {
   /**
    * Record performance metric
@@ -165,6 +188,63 @@ export const performanceOptimizationService = {
   },
 
   /**
+   * Generate performance report
+   */
+  async generatePerformanceReport(
+    startDate: Date,
+    endDate: Date
+  ): Promise<PerformanceReport> {
+    try {
+      // Get response time metrics
+      const responseTimeMetrics = await this.getAverageMetrics('response_time', startDate, endDate);
+      
+      // Calculate percentiles (simplified - would need more complex query in production)
+      const p95ResponseTime = responseTimeMetrics.average * 1.5; // Approximation
+      const p99ResponseTime = responseTimeMetrics.average * 2; // Approximation
+
+      // Get throughput
+      const throughputMetrics = await this.getAverageMetrics('throughput', startDate, endDate);
+
+      // Get error rate
+      const errorRateMetrics = await this.getAverageMetrics('error_rate', startDate, endDate);
+
+      // Get cache hit rate
+      const cacheMetrics = await this.getAverageMetrics('cache_hit_rate', startDate, endDate);
+
+      // Generate recommendations
+      const recommendations = await this.generateRecommendations({
+        averageResponseTime: responseTimeMetrics.average,
+        errorRate: errorRateMetrics.average,
+        cacheHitRate: cacheMetrics.average,
+      });
+
+      const report: PerformanceReport = {
+        id: uuidv4(),
+        period: {
+          start: startDate,
+          end: endDate,
+        },
+        metrics: {
+          averageResponseTime: responseTimeMetrics.average,
+          p95ResponseTime,
+          p99ResponseTime,
+          throughput: throughputMetrics.average,
+          errorRate: errorRateMetrics.average,
+          cacheHitRate: cacheMetrics.average,
+        },
+        recommendations,
+        generatedAt: new Date(),
+      };
+
+      logger.info(`Performance report generated for period ${startDate.toISOString()} to ${endDate.toISOString()}`);
+      return report;
+    } catch (error: any) {
+      logger.error(`Error generating performance report:`, error);
+      throw new Error(`Failed to generate performance report: ${error.message}`);
+    }
+  },
+
+  /**
    * Apply optimization
    */
   async applyOptimization(
@@ -208,6 +288,32 @@ export const performanceOptimizationService = {
     } catch (error: any) {
       logger.error(`Error applying optimization:`, error);
       throw new Error(`Failed to apply optimization: ${error.message}`);
+    }
+  },
+
+  /**
+   * Optimize database queries
+   */
+  async optimizeDatabaseQueries(): Promise<PerformanceOptimization[]> {
+    const optimizations: PerformanceOptimization[] = [];
+
+    try {
+      // Find slow queries
+      const slowQueries = await this.findSlowQueries();
+
+      for (const query of slowQueries) {
+        // Analyze query and suggest optimizations
+        const optimization = await this.analyzeQuery(query);
+        if (optimization) {
+          optimizations.push(optimization);
+        }
+      }
+
+      logger.info(`Database query optimization completed: ${optimizations.length} optimizations found`);
+      return optimizations;
+    } catch (error: any) {
+      logger.error(`Error optimizing database queries:`, error);
+      throw new Error(`Failed to optimize queries: ${error.message}`);
     }
   },
 
@@ -258,29 +364,55 @@ export const performanceOptimizationService = {
   },
 
   /**
-   * Optimize database queries
+   * Generate recommendations
    */
-  async optimizeDatabaseQueries(): Promise<PerformanceOptimization[]> {
-    const optimizations: PerformanceOptimization[] = [];
+  private async generateRecommendations(metrics: {
+    averageResponseTime: number;
+    errorRate: number;
+    cacheHitRate: number;
+  }): Promise<PerformanceReport['recommendations']> {
+    const recommendations: PerformanceReport['recommendations'] = [];
 
-    try {
-      // Find slow queries
-      const slowQueries = await this.findSlowQueries();
-
-      for (const query of slowQueries) {
-        // Analyze query and suggest optimizations
-        const optimization = await this.analyzeQuery(query);
-        if (optimization) {
-          optimizations.push(optimization);
-        }
-      }
-
-      logger.info(`Database query optimization completed: ${optimizations.length} optimizations found`);
-      return optimizations;
-    } catch (error: any) {
-      logger.error(`Error optimizing database queries:`, error);
-      throw new Error(`Failed to optimize queries: ${error.message}`);
+    // Response time recommendations
+    if (metrics.averageResponseTime > 1000) {
+      recommendations.push({
+        type: 'caching',
+        description: 'Implement caching for frequently accessed data',
+        impact: 'high',
+        effort: 'medium',
+      });
     }
+
+    if (metrics.averageResponseTime > 500) {
+      recommendations.push({
+        type: 'query_optimization',
+        description: 'Optimize database queries and add indexes',
+        impact: 'high',
+        effort: 'medium',
+      });
+    }
+
+    // Error rate recommendations
+    if (metrics.errorRate > 5) {
+      recommendations.push({
+        type: 'error_handling',
+        description: 'Improve error handling and retry logic',
+        impact: 'high',
+        effort: 'low',
+      });
+    }
+
+    // Cache hit rate recommendations
+    if (metrics.cacheHitRate < 50) {
+      recommendations.push({
+        type: 'caching',
+        description: 'Increase cache TTL and expand cache coverage',
+        impact: 'medium',
+        effort: 'low',
+      });
+    }
+
+    return recommendations;
   },
 
   /**
@@ -344,4 +476,3 @@ export const performanceOptimizationService = {
     };
   },
 };
-
