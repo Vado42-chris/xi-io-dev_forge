@@ -12,7 +12,9 @@ import { StatusManager } from './status-manager';
 import { AppConfigManager } from './app-config';
 import { ModelPanel } from './components/model-panel';
 import { PluginPanel } from './components/plugin-panel';
+import { FireTeamsPanel } from './components/fire-teams-panel';
 import { modelManager } from './model-manager';
+import { fireTeamsSystem } from './systems/fire-teams';
 import { MultiModelExecutor } from './services/multi-model-executor';
 
 // Wait for DOM to be ready
@@ -66,6 +68,9 @@ async function initializeApp(): Promise<void> {
 
     // Initialize Plugin Panel
     await initializePluginPanel();
+
+    // Initialize Fire Teams Panel
+    await initializeFireTeamsPanel();
 
     // Initialize Multi-Model Executor
     initializeMultiModelExecutor();
@@ -247,6 +252,21 @@ async function initializePluginPanel(): Promise<void> {
   } catch (error) {
     console.error('[Renderer] Plugin Panel initialization error:', error);
     updateStatus('Plugin Panel error', 5000);
+  }
+}
+
+/**
+ * Initialize Fire Teams Panel
+ */
+async function initializeFireTeamsPanel(): Promise<void> {
+  try {
+    const fireTeamsPanel = new FireTeamsPanel('fire-teams-panel-container', fireTeamsSystem);
+    fireTeamsPanel.render();
+    console.log('[Renderer] Fire Teams Panel initialized');
+    updateStatus('Fire Teams Panel ready', 2000);
+  } catch (error) {
+    console.error('[Renderer] Fire Teams Panel initialization error:', error);
+    updateStatus('Fire Teams Panel error', 5000);
   }
 }
 
