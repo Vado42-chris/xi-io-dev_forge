@@ -41,7 +41,7 @@ export interface AuthResult {
 export class AuthService {
   private db = getDatabase();
   private jwtSecret: string;
-  private jwtExpiresIn: string | number;
+  private jwtExpiresIn: string;
 
   constructor() {
     this.jwtSecret = process.env.JWT_SECRET || 'dev-secret-change-in-production';
@@ -190,11 +190,9 @@ export class AuthService {
    */
   private generateToken(userId: string, email: string): string {
     const payload = { userId, email };
-    // JWT expiresIn accepts string or number
-    const expiresIn = typeof this.jwtExpiresIn === 'string' 
-      ? this.jwtExpiresIn 
-      : this.jwtExpiresIn;
-    const options: jwt.SignOptions = { expiresIn };
+    const options: jwt.SignOptions = { 
+      expiresIn: this.jwtExpiresIn 
+    };
     return jwt.sign(payload, this.jwtSecret, options);
   }
 
