@@ -127,7 +127,7 @@ export class MultiagentView {
     import('../model-manager').then(({ modelManager }) => {
       const models = modelManager.getEnabledModels();
       
-      container.innerHTML = models.map(model => `
+      container.innerHTML = models.map((model: any) => `
         <label class="model-checkbox-label">
           <input 
             type="checkbox" 
